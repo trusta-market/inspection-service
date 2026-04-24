@@ -1,9 +1,8 @@
-package com.trustamarket.inspectionservice.inspection.domain.model.vo;
+package com.trustamarket.inspectionservice.inspection.domain.vo;
 
 import java.util.Map;
 
 public record InspectionResultDetail(Map<String, Object> data) {
-
     public InspectionResultDetail {
         data = (data == null) ? Map.of() : Map.copyOf(data);
     }

@@ -1,4 +1,4 @@
-package com.trustamarket.inspectionservice.inspection.domain.model.enums;
+package com.trustamarket.inspectionservice.inspection.domain.enums;
 
 public enum InspectionStatus {
     REQUESTED,

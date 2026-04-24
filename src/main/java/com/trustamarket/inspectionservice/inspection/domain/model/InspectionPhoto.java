@@ -1,8 +1,8 @@
 package com.trustamarket.inspectionservice.inspection.domain.model;
 
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
-import com.trustamarket.inspectionservice.inspection.domain.model.enums.PhotoType;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.PhotoId;
+import com.trustamarket.inspectionservice.inspection.domain.enums.PhotoType;
+import com.trustamarket.inspectionservice.inspection.domain.vo.PhotoId;
 
 import java.util.Objects;
 

@@ -1,7 +1,7 @@
-package com.trustamarket.inspectionservice.inspection.domain.model.vo;
+package com.trustamarket.inspectionservice.inspection.domain.vo;
 
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
-import com.trustamarket.inspectionservice.inspection.domain.model.enums.CurrencyCode;
+import com.trustamarket.inspectionservice.inspection.domain.enums.CurrencyCode;
 
 import java.math.BigDecimal;
 import java.util.Objects;
