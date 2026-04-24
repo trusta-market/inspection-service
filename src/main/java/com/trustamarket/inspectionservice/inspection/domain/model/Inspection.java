@@ -1,18 +1,18 @@
 package com.trustamarket.inspectionservice.inspection.domain.model;
 
-import com.trustamarket.inspectionservice.center.domain.model.vo.CenterId;
+import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
+import com.trustamarket.inspectionservice.inspection.domain.enums.Grade;
+import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
+import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionType;
+import com.trustamarket.inspectionservice.inspection.domain.enums.PhotoType;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
-import com.trustamarket.inspectionservice.inspection.domain.model.enums.Grade;
-import com.trustamarket.inspectionservice.inspection.domain.model.enums.InspectionStatus;
-import com.trustamarket.inspectionservice.inspection.domain.model.enums.InspectionType;
-import com.trustamarket.inspectionservice.inspection.domain.model.enums.PhotoType;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.InspectionId;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.InspectionResultDetail;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.InspectorId;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.Money;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.PhotoId;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.ProductId;
-import com.trustamarket.inspectionservice.inspection.domain.model.vo.SellerId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionResultDetail;
+import com.trustamarket.inspectionservice.inspection.domain.vo.InspectorId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.Money;
+import com.trustamarket.inspectionservice.inspection.domain.vo.PhotoId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.SellerId;
 import lombok.Getter;
 
 import java.time.Instant;

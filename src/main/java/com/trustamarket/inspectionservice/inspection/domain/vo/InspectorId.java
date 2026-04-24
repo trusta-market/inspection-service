@@ -1,10 +1,9 @@
-package com.trustamarket.inspectionservice.inspection.domain.model.vo;
+package com.trustamarket.inspectionservice.inspection.domain.vo;
 
 import java.util.Objects;
 import java.util.UUID;
 
 public record InspectorId(UUID value) {
-
     public InspectorId {
         Objects.requireNonNull(value, "InspectorId 값은 필수입니다");
     }

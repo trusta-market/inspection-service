@@ -1,6 +1,6 @@
-package com.trustamarket.inspectionservice.center.domain.model.vo;
+package com.trustamarket.inspectionservice.center.domain.vo;
 
-import com.trustamarket.inspectionservice.center.domain.model.exception.InspectionCenterException;
+import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
 
 public record Address(
         String line1,
