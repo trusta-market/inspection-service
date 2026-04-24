@@ -1,0 +1,239 @@
+package com.trustamarket.inspectionservice.inspection.domain.model;
+
+import com.trustamarket.inspectionservice.center.domain.model.vo.CenterId;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
+import com.trustamarket.inspectionservice.inspection.domain.model.enums.Grade;
+import com.trustamarket.inspectionservice.inspection.domain.model.enums.InspectionStatus;
+import com.trustamarket.inspectionservice.inspection.domain.model.enums.InspectionType;
+import com.trustamarket.inspectionservice.inspection.domain.model.enums.PhotoType;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.InspectionId;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.InspectionResultDetail;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.InspectorId;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.Money;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.PhotoId;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.ProductId;
+import com.trustamarket.inspectionservice.inspection.domain.model.vo.SellerId;
+import lombok.Getter;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+@Getter
+public class Inspection {
+
+    private final InspectionId id;
+    private final ProductId productId;
+    private final SellerId sellerId;
+    private final CenterId centerId;
+    private final InspectionType type;
+    private final Money originalPrice;
+    private final Instant requestedAt;
+
+    private InspectionStatus status;
+    private InspectorId inspectorId;
+    private Instant arrivedAt;
+    private Instant startedAt;
+    private Instant inspectionDoneAt;
+    private Instant pricedAt;
+    private Instant sellerDecidedAt;
+
+    private Grade grade;
+    private Money suggestedPrice;
+    private Money finalPrice;
+    private String inspectorNote;
+    private String rejectReason;
+    private InspectionResultDetail resultDetail;
+
+    private final List<InspectionPhoto> photos = new ArrayList<>();
+
+    private Inspection(
+            InspectionId id,
+            ProductId productId,
+            SellerId sellerId,
+            CenterId centerId,
+            InspectionType type,
+            Money originalPrice,
+            Instant requestedAt,
+            InspectionStatus status
+    ) {
+        this.id = Objects.requireNonNull(id);
+        this.productId = Objects.requireNonNull(productId);
+        this.sellerId = Objects.requireNonNull(sellerId);
+        this.centerId = Objects.requireNonNull(centerId);
+        this.type = Objects.requireNonNull(type);
+        this.originalPrice = Objects.requireNonNull(originalPrice);
+        this.requestedAt = Objects.requireNonNull(requestedAt);
+        this.status = Objects.requireNonNull(status);
+    }
+
+    public static Inspection request(
+            InspectionId id,
+            ProductId productId,
+            SellerId sellerId,
+            CenterId centerId,
+            InspectionType type,
+            Money originalPrice,
+            Instant requestedAt
+    ) {
+        return new Inspection(
+                id, productId, sellerId, centerId, type, originalPrice, requestedAt,
+                InspectionStatus.REQUESTED
+        );
+    }
+
+    public void markArrived(Instant arrivedAt) {
+        requireStatus(InspectionStatus.REQUESTED, "입고 확인");
+        this.status = InspectionStatus.ARRIVED;
+        this.arrivedAt = Objects.requireNonNull(arrivedAt);
+    }
+
+    public void start(InspectorId inspectorId, Instant startedAt) {
+        requireStatus(InspectionStatus.ARRIVED, "검수 시작");
+        this.status = InspectionStatus.IN_PROGRESS;
+        this.inspectorId = Objects.requireNonNull(inspectorId);
+        this.startedAt = Objects.requireNonNull(startedAt);
+    }
+
+    public void completeInspection(
+            Grade grade,
+            Money suggestedPrice,
+            String inspectorNote,
+            InspectionResultDetail resultDetail,
+            Instant at
+    ) {
+        requireStatus(InspectionStatus.IN_PROGRESS, "검수 완료(통과)");
+        this.grade = Objects.requireNonNull(grade, "grade는 필수입니다");
+        this.suggestedPrice = Objects.requireNonNull(suggestedPrice, "suggestedPrice는 필수입니다");
+        this.inspectorNote = inspectorNote;
+        this.resultDetail = (resultDetail == null) ? InspectionResultDetail.empty() : resultDetail;
+        this.inspectionDoneAt = Objects.requireNonNull(at);
+        this.pricedAt = at;
+        this.status = InspectionStatus.PRICED;
+    }
+
+    public void failInspection(
+            String inspectorNote,
+            InspectionResultDetail resultDetail,
+            Instant at
+    ) {
+        requireStatus(InspectionStatus.IN_PROGRESS, "검수 실패 처리");
+        if (inspectorNote == null || inspectorNote.isBlank()) {
+            throw new InspectionException("검수 실패 시 inspectorNote는 필수입니다");
+        }
+        this.inspectorNote = inspectorNote;
+        this.resultDetail = (resultDetail == null) ? InspectionResultDetail.empty() : resultDetail;
+        this.inspectionDoneAt = Objects.requireNonNull(at);
+        this.status = InspectionStatus.FAILED;
+    }
+
+    public void acceptPrice(Instant at) {
+        requireStatus(InspectionStatus.PRICED, "가격 수락");
+        this.finalPrice = this.suggestedPrice;
+        this.sellerDecidedAt = Objects.requireNonNull(at);
+        this.status = InspectionStatus.ACCEPTED;
+    }
+
+    public void rejectPrice(String reason, Instant at) {
+        requireStatus(InspectionStatus.PRICED, "가격 거절");
+        if (reason == null || reason.isBlank()) {
+            throw new InspectionException("거절 사유는 필수입니다");
+        }
+        this.rejectReason = reason;
+        this.sellerDecidedAt = Objects.requireNonNull(at);
+        this.status = InspectionStatus.REJECTED;
+    }
+
+    public PhotoId addPhoto(PhotoType photoType, String url, String caption, int displayOrder) {
+        ensurePhotoTypeAllowed(photoType);
+        PhotoId photoId = PhotoId.generate();
+        photos.add(new InspectionPhoto(photoId, photoType, url, caption, displayOrder));
+        return photoId;
+    }
+
+    public void removePhoto(PhotoId photoId) {
+        InspectionPhoto target = photos.stream()
+                .filter(p -> p.id().equals(photoId))
+                .findFirst()
+                .orElseThrow(() -> new InspectionException("해당 사진이 없습니다: " + photoId));
+        ensurePhotoTypeAllowed(target.type());
+        photos.remove(target);
+    }
+
+    public List<InspectionPhoto> getPhotos() {
+        return Collections.unmodifiableList(photos);
+    }
+
+    private void ensurePhotoTypeAllowed(PhotoType photoType) {
+        Set<PhotoType> allowed = allowedPhotoTypes();
+        if (!allowed.contains(photoType)) {
+            throw new InspectionException(
+                    "현재 상태(" + status + ")에서는 " + photoType + " 사진을 수정할 수 없습니다"
+            );
+        }
+    }
+
+    private Set<PhotoType> allowedPhotoTypes() {
+        return switch (status) {
+            case REQUESTED, ARRIVED -> EnumSet.of(PhotoType.EXTERIOR, PhotoType.INTERIOR);
+            case IN_PROGRESS -> EnumSet.of(PhotoType.DEFECT, PhotoType.TAG);
+            default -> EnumSet.noneOf(PhotoType.class);
+        };
+    }
+
+    private void requireStatus(InspectionStatus expected, String action) {
+        if (this.status != expected) {
+            throw new InspectionException(
+                    action + "은(는) " + expected + " 상태에서만 가능합니다 (현재: " + this.status + ")"
+            );
+        }
+    }
+
+    public static Inspection restore(
+            InspectionId id,
+            ProductId productId,
+            SellerId sellerId,
+            CenterId centerId,
+            InspectionType type,
+            Money originalPrice,
+            Instant requestedAt,
+            InspectionStatus status,
+            InspectorId inspectorId,
+            Instant arrivedAt,
+            Instant startedAt,
+            Instant inspectionDoneAt,
+            Instant pricedAt,
+            Instant sellerDecidedAt,
+            Grade grade,
+            Money suggestedPrice,
+            Money finalPrice,
+            String inspectorNote,
+            String rejectReason,
+            InspectionResultDetail resultDetail,
+            List<InspectionPhoto> photos
+    ) {
+        Inspection inspection = new Inspection(
+                id, productId, sellerId, centerId, type, originalPrice, requestedAt, status
+        );
+        inspection.inspectorId = inspectorId;
+        inspection.arrivedAt = arrivedAt;
+        inspection.startedAt = startedAt;
+        inspection.inspectionDoneAt = inspectionDoneAt;
+        inspection.pricedAt = pricedAt;
+        inspection.sellerDecidedAt = sellerDecidedAt;
+        inspection.grade = grade;
+        inspection.suggestedPrice = suggestedPrice;
+        inspection.finalPrice = finalPrice;
+        inspection.inspectorNote = inspectorNote;
+        inspection.rejectReason = rejectReason;
+        inspection.resultDetail = resultDetail;
+        if (photos != null) {
+            inspection.photos.addAll(photos);
+        }
+        return inspection;
+    }
+}
