@@ -86,22 +86,22 @@ public class InspectionCenter {
     }
 
     public void open() {
-        if (this.status == CenterStatus.OPEN) {
-            throw new InspectionCenterException("이미 OPEN 상태입니다");
+        if (this.status != CenterStatus.MAINTENANCE) {
+            throw new InspectionCenterException("OPEN 전이는 MAINTENANCE에서만 가능합니다");
         }
         this.status = CenterStatus.OPEN;
     }
 
     public void startMaintenance() {
-        if (this.status == CenterStatus.MAINTENANCE) {
-            throw new InspectionCenterException("이미 MAINTENANCE 상태입니다");
+        if (this.status != CenterStatus.OPEN) {
+            throw new InspectionCenterException("MAINTENANCE 전이는 OPEN에서만 가능합니다");
         }
         this.status = CenterStatus.MAINTENANCE;
     }
 
     public void close() {
-        if (this.status == CenterStatus.CLOSED) {
-            throw new InspectionCenterException("이미 CLOSED 상태입니다");
+        if (this.status != CenterStatus.MAINTENANCE) {
+            throw new InspectionCenterException("CLOSED 전이는 MAINTENANCE에서만 가능합니다");
         }
         this.status = CenterStatus.CLOSED;
     }
