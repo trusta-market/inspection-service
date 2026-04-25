@@ -33,9 +33,15 @@ public class InspectionCenter {
         this.address = Objects.requireNonNull(address, "주소(address)는 필수입니다");
         this.contactPhone = contactPhone;
         this.capacity = requirePositive(capacity, "capacity");
+
         if (currentLoad < 0) {
             throw new InspectionCenterException("현재 부하(currentLoad)는 0 이상이어야 합니다");
         }
+
+        if (currentLoad > capacity) {
+            throw new InspectionCenterException("현재 부하(currentLoad)는 capacity를 초과할 수 없습니다");
+        }
+
         this.currentLoad = currentLoad;
         this.status = Objects.requireNonNull(status);
     }
