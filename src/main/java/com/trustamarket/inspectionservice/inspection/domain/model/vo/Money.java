@@ -1,11 +1,12 @@
 package com.trustamarket.inspectionservice.inspection.domain.model.vo;
 
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
+import com.trustamarket.inspectionservice.inspection.domain.model.enums.CurrencyCode;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public record Money(BigDecimal amount, String currency) {
+public record Money(BigDecimal amount, CurrencyCode currency) {
 
     public Money {
         Objects.requireNonNull(amount, "금액(amount)은 필수입니다");
@@ -16,6 +17,6 @@ public record Money(BigDecimal amount, String currency) {
     }
 
     public static Money krw(long amount) {
-        return new Money(BigDecimal.valueOf(amount), "KRW");
+        return new Money(BigDecimal.valueOf(amount), CurrencyCode.KRW);
     }
 }
