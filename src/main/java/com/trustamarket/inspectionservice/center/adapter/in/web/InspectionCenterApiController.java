@@ -5,6 +5,7 @@ import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.Reg
 import com.trustamarket.inspectionservice.center.application.port.in.RegisterCenterUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,6 @@ public class InspectionCenterApiController {
     @PostMapping
     public ResponseEntity<RegisterCenterResponse> register(@Valid @RequestBody RegisterCenterRequest request) {
         RegisterCenterResponse response = RegisterCenterResponse.from(registerCenterUseCase.register(request.toCommand()));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
