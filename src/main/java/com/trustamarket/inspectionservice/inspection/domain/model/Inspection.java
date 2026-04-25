@@ -71,6 +71,48 @@ public class Inspection {
         this.status = Objects.requireNonNull(status);
     }
 
+    private Inspection(
+            InspectionId id,
+            ProductId productId,
+            SellerId sellerId,
+            CenterId centerId,
+            InspectionType type,
+            Money originalPrice,
+            Instant requestedAt,
+            InspectionStatus status,
+            InspectorId inspectorId,
+            Instant arrivedAt,
+            Instant startedAt,
+            Instant inspectionDoneAt,
+            Instant pricedAt,
+            Instant sellerDecidedAt,
+            Grade grade,
+            Money suggestedPrice,
+            Money finalPrice,
+            String inspectorNote,
+            String rejectReason,
+            InspectionResultDetail resultDetail,
+            List<InspectionPhoto> photos
+    ) {
+        this(id, productId, sellerId, centerId, type, originalPrice, requestedAt, status);
+        this.inspectorId = inspectorId;
+        this.arrivedAt = arrivedAt;
+        this.startedAt = startedAt;
+        this.inspectionDoneAt = inspectionDoneAt;
+        this.pricedAt = pricedAt;
+        this.sellerDecidedAt = sellerDecidedAt;
+        this.grade = grade;
+        this.suggestedPrice = suggestedPrice;
+        this.finalPrice = finalPrice;
+        this.inspectorNote = inspectorNote;
+        this.rejectReason = rejectReason;
+        this.resultDetail = resultDetail;
+        if (photos != null) {
+            this.photos.addAll(photos);
+        }
+        validateInvariants();
+    }
+
     public static Inspection request(
             InspectionId id,
             ProductId productId,
@@ -193,6 +235,55 @@ public class Inspection {
         }
     }
 
+    private void validateInvariants() {
+        switch (status) {
+            case REQUESTED -> {}
+            case ARRIVED -> requireArrivedTier();
+            case IN_PROGRESS -> { requireArrivedTier(); requireInProgressTier(); }
+            case PRICED -> { requireArrivedTier(); requireInProgressTier(); requirePricedTier(); }
+            case FAILED -> { requireArrivedTier(); requireInProgressTier(); requireFailedTier(); }
+            case ACCEPTED -> { requireArrivedTier(); requireInProgressTier(); requirePricedTier(); requireAcceptedTier(); }
+            case REJECTED -> { requireArrivedTier(); requireInProgressTier(); requirePricedTier(); requireRejectedTier(); }
+        }
+    }
+
+    private void requireArrivedTier() {
+        require(arrivedAt != null, "arrivedAt");
+    }
+
+    private void requireInProgressTier() {
+        require(inspectorId != null, "inspectorId");
+        require(startedAt != null, "startedAt");
+    }
+
+    private void requirePricedTier() {
+        require(grade != null, "grade");
+        require(suggestedPrice != null, "suggestedPrice");
+        require(inspectionDoneAt != null, "inspectionDoneAt");
+        require(pricedAt != null, "pricedAt");
+    }
+
+    private void requireFailedTier() {
+        require(inspectorNote != null && !inspectorNote.isBlank(), "inspectorNote");
+        require(inspectionDoneAt != null, "inspectionDoneAt");
+    }
+
+    private void requireAcceptedTier() {
+        require(finalPrice != null, "finalPrice");
+        require(sellerDecidedAt != null, "sellerDecidedAt");
+    }
+
+    private void requireRejectedTier() {
+        require(rejectReason != null && !rejectReason.isBlank(), "rejectReason");
+        require(sellerDecidedAt != null, "sellerDecidedAt");
+    }
+
+    private void require(boolean condition, String fieldName) {
+        if (!condition) {
+            throw new InspectionException(status + " 상태 복원 시 " + fieldName + "은(는) 필수입니다");
+        }
+    }
+
     public static Inspection restore(
             InspectionId id,
             ProductId productId,
@@ -216,24 +307,10 @@ public class Inspection {
             InspectionResultDetail resultDetail,
             List<InspectionPhoto> photos
     ) {
-        Inspection inspection = new Inspection(
-                id, productId, sellerId, centerId, type, originalPrice, requestedAt, status
+        return new Inspection(
+                id, productId, sellerId, centerId, type, originalPrice, requestedAt, status,
+                inspectorId, arrivedAt, startedAt, inspectionDoneAt, pricedAt, sellerDecidedAt,
+                grade, suggestedPrice, finalPrice, inspectorNote, rejectReason, resultDetail, photos
         );
-        inspection.inspectorId = inspectorId;
-        inspection.arrivedAt = arrivedAt;
-        inspection.startedAt = startedAt;
-        inspection.inspectionDoneAt = inspectionDoneAt;
-        inspection.pricedAt = pricedAt;
-        inspection.sellerDecidedAt = sellerDecidedAt;
-        inspection.grade = grade;
-        inspection.suggestedPrice = suggestedPrice;
-        inspection.finalPrice = finalPrice;
-        inspection.inspectorNote = inspectorNote;
-        inspection.rejectReason = rejectReason;
-        inspection.resultDetail = resultDetail;
-        if (photos != null) {
-            inspection.photos.addAll(photos);
-        }
-        return inspection;
     }
 }
