@@ -1,9 +1,11 @@
 package com.trustamarket.inspectionservice.center.adapter.out.persistence.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,12 +15,24 @@ public interface InspectionCenterJpaRepository extends JpaRepository<InspectionC
 
     @Query("""
             SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
-                FROM InspectionCenterJpaEntity c
-                WHERE c.name = :name AND c.addressLine1 = :addressLine1 AND c.postalCode = :postalCode AND c.deletedAt IS NULL
+            FROM InspectionCenterJpaEntity c
+            WHERE c.name = :name AND c.addressLine1 = :addressLine1 AND c.postalCode = :postalCode AND c.deletedAt IS NULL
             """)
     boolean existsByNameAndAddressLine1AndPostalCode(
             @Param("name") String name,
             @Param("addressLine1") String addressLine1,
             @Param("postalCode") String postalCode
+    );
+
+    @Modifying
+    @Query("""
+            UPDATE InspectionCenterJpaEntity c
+            SET c.deletedAt = :deletedAt, c.deletedBy = :deletedBy
+            WHERE c.centerId = :centerId AND c.deletedAt IS NULL
+            """)
+    void softDeleteById(
+            @Param("centerId") UUID centerId,
+            @Param("deletedAt") LocalDateTime deletedAt,
+            @Param("deletedBy") String deletedBy
     );
 }

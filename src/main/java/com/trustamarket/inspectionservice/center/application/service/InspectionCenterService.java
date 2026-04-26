@@ -4,6 +4,7 @@ import com.trustamarket.inspectionservice.center.application.dto.command.Registe
 import com.trustamarket.inspectionservice.center.application.dto.result.ChangeCenterStatusResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.RegisterCenterResult;
 import com.trustamarket.inspectionservice.center.application.port.in.ChangeCenterStatusUseCase;
+import com.trustamarket.inspectionservice.center.application.port.in.DeleteCenterUseCase;
 import com.trustamarket.inspectionservice.center.application.port.in.RegisterCenterUseCase;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class InspectionCenterService implements RegisterCenterUseCase, ChangeCenterStatusUseCase {
+public class InspectionCenterService implements RegisterCenterUseCase, ChangeCenterStatusUseCase, DeleteCenterUseCase {
 
     private final InspectionCenterRepository inspectionCenterRepository;
 
@@ -78,6 +79,14 @@ public class InspectionCenterService implements RegisterCenterUseCase, ChangeCen
         center.close();
         InspectionCenter saved = inspectionCenterRepository.save(center);
         return new ChangeCenterStatusResult(saved.getId().value(), saved.getStatus());
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID centerId, String deletedBy) {
+        InspectionCenter center = findCenterOrThrow(centerId);
+        center.validateDeletable();
+        inspectionCenterRepository.delete(CenterId.of(centerId), deletedBy);
     }
 
     private InspectionCenter findCenterOrThrow(UUID centerId) {
