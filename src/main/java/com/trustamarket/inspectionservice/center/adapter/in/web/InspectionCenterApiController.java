@@ -3,9 +3,7 @@ package com.trustamarket.inspectionservice.center.adapter.in.web;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.request.RegisterCenterRequest;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.ChangeCenterStatusResponse;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.RegisterCenterResponse;
-import com.trustamarket.inspectionservice.center.application.port.in.ChangeCenterStatusUseCase;
-import com.trustamarket.inspectionservice.center.application.port.in.DeleteCenterUseCase;
-import com.trustamarket.inspectionservice.center.application.port.in.RegisterCenterUseCase;
+import com.trustamarket.inspectionservice.center.application.port.in.InspectionCenterUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,29 +23,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InspectionCenterApiController {
 
-    private final RegisterCenterUseCase registerCenterUseCase;
-    private final ChangeCenterStatusUseCase changeCenterStatusUseCase;
-    private final DeleteCenterUseCase deleteCenterUseCase;
+    private final InspectionCenterUseCase inspectionCenterUseCase;
 
     @PostMapping
     public ResponseEntity<RegisterCenterResponse> register(@Valid @RequestBody RegisterCenterRequest request) {
-        RegisterCenterResponse response = RegisterCenterResponse.from(registerCenterUseCase.register(request.toCommand()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(RegisterCenterResponse.from(inspectionCenterUseCase.register(request.toCommand())));
     }
 
     @PostMapping("/{centerId}/open")
     public ResponseEntity<ChangeCenterStatusResponse> open(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(ChangeCenterStatusResponse.from(changeCenterStatusUseCase.open(centerId)));
+        return ResponseEntity.ok(ChangeCenterStatusResponse.from(inspectionCenterUseCase.open(centerId)));
     }
 
     @PostMapping("/{centerId}/maintenance")
     public ResponseEntity<ChangeCenterStatusResponse> startMaintenance(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(ChangeCenterStatusResponse.from(changeCenterStatusUseCase.startMaintenance(centerId)));
+        return ResponseEntity.ok(ChangeCenterStatusResponse.from(inspectionCenterUseCase.startMaintenance(centerId)));
     }
 
     @PostMapping("/{centerId}/close")
     public ResponseEntity<ChangeCenterStatusResponse> close(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(ChangeCenterStatusResponse.from(changeCenterStatusUseCase.close(centerId)));
+        return ResponseEntity.ok(ChangeCenterStatusResponse.from(inspectionCenterUseCase.close(centerId)));
     }
 
     @DeleteMapping("/{centerId}")
@@ -55,7 +51,7 @@ public class InspectionCenterApiController {
             @PathVariable UUID centerId,
             @RequestHeader(value = "X-User-Id", required = false, defaultValue = "system") String userId
     ) {
-        deleteCenterUseCase.delete(centerId, userId);
+        inspectionCenterUseCase.delete(centerId, userId);
         return ResponseEntity.noContent().build();
     }
 }
