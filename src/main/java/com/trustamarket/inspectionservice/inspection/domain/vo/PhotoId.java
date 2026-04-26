@@ -1,11 +1,14 @@
 package com.trustamarket.inspectionservice.inspection.domain.vo;
 
-import java.util.Objects;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
+
 import java.util.UUID;
 
 public record PhotoId(UUID value) {
     public PhotoId {
-        Objects.requireNonNull(value, "PhotoId 값은 필수입니다");
+        if (value == null) {
+            throw new InspectionException("PhotoId는 null일 수 없습니다");
+        }
     }
 
     public static PhotoId generate() {

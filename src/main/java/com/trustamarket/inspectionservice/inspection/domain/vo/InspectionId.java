@@ -1,11 +1,14 @@
 package com.trustamarket.inspectionservice.inspection.domain.vo;
 
-import java.util.Objects;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
+
 import java.util.UUID;
 
 public record InspectionId(UUID value) {
     public InspectionId {
-        Objects.requireNonNull(value, "InspectionId 값은 필수입니다");
+        if (value == null) {
+            throw new InspectionException("InspectionId는 null일 수 없습니다");
+        }
     }
 
     public static InspectionId generate() {
