@@ -25,9 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
+import static org.mockito.BDDMockito.willDoNothing;
 
 @ExtendWith(MockitoExtension.class)
 class InspectionCenterServiceTest {
@@ -290,6 +292,57 @@ class InspectionCenterServiceTest {
 
             assertThatThrownBy(() -> inspectionCenterService.close(CENTER_ID))
                     .isInstanceOf(InspectionCenterException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("센터 삭제 (delete)")
+    class Delete {
+
+        private static final String DELETED_BY = "admin-user";
+
+        @Test
+        @DisplayName("CLOSED 상태의 센터를 삭제하면 repository.delete()가 호출된다")
+        void delete_success() {
+            InspectionCenter center = centerInStatus(CenterStatus.CLOSED);
+            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
+            willDoNothing().given(inspectionCenterRepository).delete(eq(CenterId.of(CENTER_ID)), eq(DELETED_BY));
+
+            inspectionCenterService.delete(CENTER_ID, DELETED_BY);
+
+            then(inspectionCenterRepository).should().delete(CenterId.of(CENTER_ID), DELETED_BY);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 센터 ID면 InspectionCenterException을 던진다")
+        void delete_notFound_throwsException() {
+            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionCenterService.delete(CENTER_ID, DELETED_BY))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("존재하지 않는 센터");
+        }
+
+        @Test
+        @DisplayName("OPEN 상태의 센터를 삭제하면 InspectionCenterException을 던진다")
+        void delete_openStatus_throwsException() {
+            InspectionCenter center = centerInStatus(CenterStatus.OPEN);
+            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
+
+            assertThatThrownBy(() -> inspectionCenterService.delete(CENTER_ID, DELETED_BY))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("CLOSED");
+        }
+
+        @Test
+        @DisplayName("MAINTENANCE 상태의 센터를 삭제하면 InspectionCenterException을 던진다")
+        void delete_maintenanceStatus_throwsException() {
+            InspectionCenter center = centerInStatus(CenterStatus.MAINTENANCE);
+            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
+
+            assertThatThrownBy(() -> inspectionCenterService.delete(CENTER_ID, DELETED_BY))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("CLOSED");
         }
     }
 }
