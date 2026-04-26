@@ -12,5 +12,11 @@ public record Address(
         if (line1 == null || line1.isBlank()) {
             throw new InspectionCenterException("주소(line1)는 비어있을 수 없습니다");
         }
+        if (city == null || city.isBlank()) {
+            throw new InspectionCenterException("도시(city)는 비어있을 수 없습니다");
+        }
+        if (postalCode == null || postalCode.isBlank()) {
+            throw new InspectionCenterException("우편번호(postalCode)는 비어있을 수 없습니다");
+        }
     }
 }
