@@ -25,4 +25,9 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
         return jpaRepository.findByCenterIdAndDeletedAtIsNull(id.value())
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public boolean existsByNameAndAddress(String name, String addressLine1, String postalCode) {
+        return jpaRepository.existsByNameAndAddressLine1AndPostalCode(name, addressLine1, postalCode);
+    }
 }

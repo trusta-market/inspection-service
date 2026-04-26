@@ -10,4 +10,6 @@ public interface InspectionCenterRepository {
     InspectionCenter save(InspectionCenter center);
 
     Optional<InspectionCenter> findById(CenterId id);
+
+    boolean existsByNameAndAddress(String name, String addressLine1, String postalCode);
 }
