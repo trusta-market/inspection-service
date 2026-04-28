@@ -1,6 +1,6 @@
 package com.trustamarket.inspectionservice.center.domain.model;
 
-import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
+import com.trustamarket.inspectionservice.center.domain.model.enums.CenterStatus;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
 import com.trustamarket.inspectionservice.center.domain.vo.Address;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;

@@ -3,7 +3,7 @@ package com.trustamarket.inspectionservice.center.application.service;
 import com.trustamarket.inspectionservice.center.application.dto.command.RegisterCenterCommand;
 import com.trustamarket.inspectionservice.center.application.dto.result.RegisterCenterResult;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
-import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
+import com.trustamarket.inspectionservice.center.domain.model.enums.CenterStatus;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
 import com.trustamarket.inspectionservice.center.domain.model.InspectionCenter;
 import org.junit.jupiter.api.DisplayName;

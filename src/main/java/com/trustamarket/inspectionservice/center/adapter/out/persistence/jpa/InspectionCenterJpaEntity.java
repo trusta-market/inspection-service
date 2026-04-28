@@ -1,6 +1,6 @@
 package com.trustamarket.inspectionservice.center.adapter.out.persistence.jpa;
 
-import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
+import com.trustamarket.inspectionservice.center.domain.model.enums.CenterStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
