@@ -86,24 +86,24 @@ public class InspectionCenter {
     }
 
     public void open() {
-        if (this.status != CenterStatus.MAINTENANCE) {
-            throw new InspectionCenterException("OPEN 전이는 MAINTENANCE에서만 가능합니다");
-        }
-        this.status = CenterStatus.OPEN;
+        transitionTo(CenterStatus.OPEN);
     }
 
     public void startMaintenance() {
-        if (this.status != CenterStatus.OPEN) {
-            throw new InspectionCenterException("MAINTENANCE 전이는 OPEN에서만 가능합니다");
-        }
-        this.status = CenterStatus.MAINTENANCE;
+        transitionTo(CenterStatus.MAINTENANCE);
     }
 
     public void close() {
-        if (this.status != CenterStatus.MAINTENANCE) {
-            throw new InspectionCenterException("CLOSED 전이는 MAINTENANCE에서만 가능합니다");
+        transitionTo(CenterStatus.CLOSED);
+    }
+
+    private void transitionTo(CenterStatus target) {
+        if (!this.status.canTransitionTo(target)) {
+            throw new InspectionCenterException(
+                    this.status + " → " + target + " 전이는 허용되지 않습니다"
+            );
         }
-        this.status = CenterStatus.CLOSED;
+        this.status = target;
     }
 
     public void rename(String newName) {
