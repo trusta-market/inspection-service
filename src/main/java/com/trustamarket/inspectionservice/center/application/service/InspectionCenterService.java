@@ -1,7 +1,10 @@
 package com.trustamarket.inspectionservice.center.application.service;
 
 import com.trustamarket.inspectionservice.center.application.dto.command.RegisterCenterCommand;
+import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.application.dto.result.ChangeCenterStatusResult;
+import com.trustamarket.inspectionservice.center.application.dto.result.GetCenterPageResult;
+import com.trustamarket.inspectionservice.center.application.dto.result.GetCenterResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.RegisterCenterResult;
 import com.trustamarket.inspectionservice.center.application.port.in.InspectionCenterUseCase;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -85,6 +89,23 @@ public class InspectionCenterService implements InspectionCenterUseCase {
         InspectionCenter center = findCenterOrThrow(centerId);
         center.validateDeletable();
         inspectionCenterRepository.delete(CenterId.of(centerId), deletedBy);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetCenterResult getCenter(UUID centerId) {
+        return GetCenterResult.from(findCenterOrThrow(centerId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetCenterPageResult getCenters(GetCentersQuery query) {
+        List<GetCenterResult> content = inspectionCenterRepository.findAll(query).stream()
+                .map(GetCenterResult::from)
+                .toList();
+        long totalElements = inspectionCenterRepository.countAll();
+        int totalPages = (int) Math.ceil((double) totalElements / query.size());
+        return new GetCenterPageResult(content, query.page(), query.size(), totalElements, totalPages);
     }
 
     private InspectionCenter findCenterOrThrow(UUID centerId) {
