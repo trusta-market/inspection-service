@@ -1,0 +1,11 @@
+### 센터 단건 조회 - 정상
+GET {{baseUrl}}/api/v1/centers/759c3fb3-d634-4982-86ce-49f1c8d2d1a1
+
+### 센터 단건 조회 - Not Found (존재하지 않는 ID)
+GET {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000999
+
+### 센터 페이징 조회 - 정상 (page, size 지정)
+GET {{baseUrl}}/api/v1/centers?page=0&size=10
+
+### 센터 페이징 조회 - 정상 (파라미터 생략, 서버 기본값 적용)
+GET {{baseUrl}}/api/v1/centers
