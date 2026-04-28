@@ -90,6 +90,28 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
         this.isNew = false;
     }
 
+    public void update(
+            String name,
+            String addressLine1,
+            String addressLine2,
+            String city,
+            String postalCode,
+            String contactPhone,
+            int capacity,
+            int currentLoad,
+            CenterStatus status
+    ) {
+        this.name = name;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.city = city;
+        this.postalCode = postalCode;
+        this.contactPhone = contactPhone;
+        this.capacity = capacity;
+        this.currentLoad = currentLoad;
+        this.status = status;
+    }
+
     public static InspectionCenterJpaEntity of(
             UUID id,
             String name,

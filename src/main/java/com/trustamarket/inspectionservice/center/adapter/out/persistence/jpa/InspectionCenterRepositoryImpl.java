@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,7 +18,11 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
 
     @Override
     public InspectionCenter save(InspectionCenter center) {
-        return mapper.toDomain(jpaRepository.save(mapper.toJpaEntity(center)));
+        UUID id = center.getId().value();
+        InspectionCenterJpaEntity entity = jpaRepository.findById(id)
+                .map(existing -> mapper.updateJpaEntity(existing, center))
+                .orElseGet(() -> mapper.toJpaEntity(center));
+        return mapper.toDomain(jpaRepository.save(entity));
     }
 
     @Override

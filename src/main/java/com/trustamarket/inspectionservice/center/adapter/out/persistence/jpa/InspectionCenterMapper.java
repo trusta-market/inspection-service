@@ -23,6 +23,21 @@ public class InspectionCenterMapper {
         );
     }
 
+    public InspectionCenterJpaEntity updateJpaEntity(InspectionCenterJpaEntity existing, InspectionCenter center) {
+        existing.update(
+                center.getName(),
+                center.getAddress().line1(),
+                center.getAddress().line2(),
+                center.getAddress().city(),
+                center.getAddress().postalCode(),
+                center.getContactPhone(),
+                center.getCapacity(),
+                center.getCurrentLoad(),
+                center.getStatus()
+        );
+        return existing;
+    }
+
     public InspectionCenter toDomain(InspectionCenterJpaEntity entity) {
         return InspectionCenter.restore(
                 CenterId.of(entity.getCenterId()),
