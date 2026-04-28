@@ -1,10 +1,12 @@
 package com.trustamarket.inspectionservice.center.adapter.in.web;
 
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.request.RegisterCenterRequest;
+import com.trustamarket.inspectionservice.center.adapter.in.web.dto.request.UpdateCenterRequest;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.ChangeCenterStatusResponse;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.GetCenterResponse;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.GetCentersResponse;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.RegisterCenterResponse;
+import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.UpdateCenterResponse;
 import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.application.port.in.InspectionCenterUseCase;
 import jakarta.validation.Valid;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +42,14 @@ public class InspectionCenterApiController {
     public ResponseEntity<GetCentersResponse> getCenters(Pageable pageable) {
         GetCentersQuery query = new GetCentersQuery(pageable.getPageNumber(), pageable.getPageSize());
         return ResponseEntity.ok(GetCentersResponse.from(inspectionCenterUseCase.getCenters(query)));
+    }
+
+    @PatchMapping("/{centerId}")
+    public ResponseEntity<UpdateCenterResponse> updateCenter(
+            @PathVariable UUID centerId,
+            @Valid @RequestBody UpdateCenterRequest request
+    ) {
+        return ResponseEntity.ok(UpdateCenterResponse.from(inspectionCenterUseCase.updateCenter(request.toCommand(centerId))));
     }
 
     @PostMapping

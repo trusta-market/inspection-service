@@ -1,11 +1,13 @@
 package com.trustamarket.inspectionservice.center.application.service;
 
 import com.trustamarket.inspectionservice.center.application.dto.command.RegisterCenterCommand;
+import com.trustamarket.inspectionservice.center.application.dto.command.UpdateCenterCommand;
 import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.application.dto.result.ChangeCenterStatusResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.GetCenterPageResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.GetCenterResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.RegisterCenterResult;
+import com.trustamarket.inspectionservice.center.application.dto.result.UpdateCenterResult;
 import com.trustamarket.inspectionservice.center.application.port.in.InspectionCenterUseCase;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
@@ -54,6 +56,18 @@ public class InspectionCenterService implements InspectionCenterUseCase {
                 saved.getName(),
                 saved.getStatus()
         );
+    }
+
+    @Override
+    @Transactional
+    public UpdateCenterResult updateCenter(UpdateCenterCommand command) {
+        InspectionCenter center = findCenterOrThrow(command.centerId());
+        center.rename(command.name());
+        center.relocate(new Address(command.addressLine1(), command.addressLine2(), command.city(), command.postalCode()));
+        center.updateContactPhone(command.contactPhone());
+        center.updateCapacity(command.capacity());
+        InspectionCenter saved = inspectionCenterRepository.save(center);
+        return UpdateCenterResult.from(saved);
     }
 
     @Override
