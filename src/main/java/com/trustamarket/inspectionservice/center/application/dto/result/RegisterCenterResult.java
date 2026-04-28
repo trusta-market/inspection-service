@@ -1,6 +1,6 @@
 package com.trustamarket.inspectionservice.center.application.dto.result;
 
-import com.trustamarket.inspectionservice.center.domain.model.enums.CenterStatus;
+import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
 
 import java.util.UUID;
 
