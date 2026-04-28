@@ -115,6 +115,10 @@ public class InspectionCenter {
     }
 
     public void updateContactPhone(String newPhone) {
+        if (newPhone != null && newPhone.isBlank()) {
+            throw new InspectionCenterException("contactPhone은 비어있을 수 없습니다");
+        }
+
         this.contactPhone = newPhone;
     }
 
