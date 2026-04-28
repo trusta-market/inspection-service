@@ -1,11 +1,13 @@
 package com.trustamarket.inspectionservice.center.domain.vo;
 
+import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
+
 import java.util.UUID;
 
 public record CenterId(UUID value) {
     public CenterId {
         if (value == null) {
-            throw new IllegalArgumentException("CenterId는 null일 수 없습니다");
+            throw new InspectionCenterException("CenterId는 null일 수 없습니다");
         }
     }
 
