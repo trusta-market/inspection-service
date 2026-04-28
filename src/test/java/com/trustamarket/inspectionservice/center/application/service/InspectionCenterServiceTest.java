@@ -18,8 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class InspectionCenterServiceTest {
@@ -117,6 +119,28 @@ class InspectionCenterServiceTest {
             assertThatThrownBy(() -> inspectionCenterService.register(command))
                     .isInstanceOf(InspectionCenterException.class)
                     .hasMessageContaining("capacity");
+        }
+
+        @Test
+        @DisplayName("동일한 이름과 주소의 센터가 이미 존재하면 InspectionCenterException을 던지고 저장하지 않는다")
+        void register_duplicateCenter_throwsException() {
+            RegisterCenterCommand command = new RegisterCenterCommand(
+                    "서울 검수 센터",
+                    "강남대로 123",
+                    null,
+                    "서울",
+                    "06000",
+                    "02-1234-5678",
+                    10
+            );
+            given(inspectionCenterRepository.existsByNameAndAddress(anyString(), anyString(), anyString()))
+                    .willReturn(true);
+
+            assertThatThrownBy(() -> inspectionCenterService.register(command))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("이미 존재하는 검사 센터입니다");
+
+            then(inspectionCenterRepository).should(never()).save(any());
         }
 
         @Test
