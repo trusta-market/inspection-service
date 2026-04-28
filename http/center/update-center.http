@@ -1,0 +1,71 @@
+### 센터 정보 변경 - 정상 (optional 포함)
+PATCH {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "name": "트러스타 강남 검수 센터 (이전)",
+  "addressLine1": "서울특별시 강남구 역삼로 123",
+  "addressLine2": "5층",
+  "city": "서울",
+  "postalCode": "06241",
+  "contactPhone": "02-9876-5432",
+  "capacity": 60
+}
+
+### 센터 정보 변경 - 정상 (optional 생략)
+PATCH {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "name": "트러스타 강남 검수 센터 (이전)",
+  "addressLine1": "서울특별시 강남구 역삼로 123",
+  "city": "서울",
+  "postalCode": "06241",
+  "capacity": 60
+}
+
+### 센터 정보 변경 - validation 실패 (name 누락)
+PATCH {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "addressLine1": "서울특별시 강남구 역삼로 123",
+  "city": "서울",
+  "postalCode": "06241",
+  "capacity": 60
+}
+
+### 센터 정보 변경 - validation 실패 (addressLine1 누락)
+PATCH {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "name": "트러스타 강남 검수 센터 (이전)",
+  "city": "서울",
+  "postalCode": "06241",
+  "capacity": 60
+}
+
+### 센터 정보 변경 - validation 실패 (capacity 최솟값 위반)
+PATCH {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "name": "트러스타 강남 검수 센터 (이전)",
+  "addressLine1": "서울특별시 강남구 역삼로 123",
+  "city": "서울",
+  "postalCode": "06241",
+  "capacity": 0
+}
+
+### 센터 정보 변경 - Not Found (존재하지 않는 센터 ID)
+PATCH {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-999999999999
+Content-Type: application/json
+
+{
+  "name": "트러스타 강남 검수 센터 (이전)",
+  "addressLine1": "서울특별시 강남구 역삼로 123",
+  "city": "서울",
+  "postalCode": "06241",
+  "capacity": 60
+}
