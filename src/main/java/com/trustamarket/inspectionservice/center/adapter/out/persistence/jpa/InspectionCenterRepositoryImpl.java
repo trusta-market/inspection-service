@@ -2,6 +2,7 @@ package com.trustamarket.inspectionservice.center.adapter.out.persistence.jpa;
 
 import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
+import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
 import com.trustamarket.inspectionservice.center.domain.model.InspectionCenter;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,19 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
     @Override
     public Optional<InspectionCenter> findById(CenterId id) {
         return jpaRepository.findByCenterIdAndDeletedAtIsNull(id.value())
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<InspectionCenter> findByIdWithLock(CenterId id) {
+        return jpaRepository.findByCenterIdForUpdate(id.value())
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<InspectionCenter> findAvailableWithLock() {
+        return jpaRepository.findAvailableForUpdate(CenterStatus.OPEN, PageRequest.of(0, 1))
+                .stream().findFirst()
                 .map(mapper::toDomain);
     }
 

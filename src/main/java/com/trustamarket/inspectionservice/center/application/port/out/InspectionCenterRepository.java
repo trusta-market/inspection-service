@@ -13,6 +13,10 @@ public interface InspectionCenterRepository {
 
     Optional<InspectionCenter> findById(CenterId id);
 
+    Optional<InspectionCenter> findByIdWithLock(CenterId id);
+
+    Optional<InspectionCenter> findAvailableWithLock();
+
     boolean existsByNameAndAddress(String name, String addressLine1, String postalCode);
 
     void delete(CenterId id, String deletedBy);
