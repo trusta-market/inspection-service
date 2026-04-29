@@ -23,4 +23,14 @@ public record InspectionPhoto(
             throw new InspectionException("displayOrder는 0 이상이어야 합니다");
         }
     }
+
+        public static InspectionPhoto of(
+                PhotoId id,
+                PhotoType type,
+                String url,
+                String caption,
+                int displayOrder
+        ) {
+            return new InspectionPhoto(id, type, url, caption, displayOrder);
+        }
 }

@@ -19,4 +19,12 @@ public record Money(BigDecimal amount, CurrencyCode currency) {
     public static Money krw(long amount) {
         return new Money(BigDecimal.valueOf(amount), CurrencyCode.KRW);
     }
+
+    public static Money of(long amount, CurrencyCode currency) {
+        return new Money(BigDecimal.valueOf(amount), currency);
+    }
+
+    public static Money of(BigDecimal amount, CurrencyCode currency) {
+        return new Money(amount, currency);
+    }
 }
