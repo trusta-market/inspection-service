@@ -1,0 +1,48 @@
+### 센터 등록 - 정상 (optional 포함)
+POST {{baseUrl}}/api/v1/centers
+Content-Type: application/json
+
+{
+  "name": "트러스타 강남 검수 센터",
+  "addressLine1": "서울특별시 강남구 테헤란로 123",
+  "addressLine2": "4층",
+  "city": "서울",
+  "postalCode": "06234",
+  "contactPhone": "02-1234-5678",
+  "capacity": 50
+}
+
+### 센터 등록 - 정상 (optional 생략)
+POST {{baseUrl}}/api/v1/centers
+Content-Type: application/json
+
+{
+  "name": "트러스타 부산 검수 센터",
+  "addressLine1": "부산광역시 해운대구 센텀중앙로 48",
+  "city": "부산",
+  "postalCode": "48058",
+  "capacity": 30
+}
+
+### 센터 등록 - validation 실패 (name 누락)
+POST {{baseUrl}}/api/v1/centers
+Content-Type: application/json
+
+{
+  "addressLine1": "서울특별시 강남구 테헤란로 123",
+  "city": "서울",
+  "postalCode": "06234",
+  "capacity": 10
+}
+
+### 센터 등록 - validation 실패 (capacity 최솟값 위반)
+POST {{baseUrl}}/api/v1/centers
+Content-Type: application/json
+
+{
+  "name": "트러스타 인천 검수 센터",
+  "addressLine1": "인천광역시 연수구 컨벤시아대로 165",
+  "city": "인천",
+  "postalCode": "22004",
+  "capacity": 0
+}
