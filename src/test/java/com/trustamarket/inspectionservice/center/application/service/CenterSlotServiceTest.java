@@ -1,5 +1,6 @@
 package com.trustamarket.inspectionservice.center.application.service;
 
+import com.trustamarket.inspectionservice.center.application.dto.command.AssignCenterCommand;
 import com.trustamarket.inspectionservice.center.application.dto.result.ReserveSlotResult;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
 import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
@@ -101,6 +102,57 @@ class CenterSlotServiceTest {
             assertThatThrownBy(() -> centerSlotService.reserveSlot())
                     .isInstanceOf(InspectionCenterException.class)
                     .hasMessageContaining("수용량 초과");
+        }
+    }
+
+    @Nested
+    @DisplayName("센터 배정 (assign)")
+    class Assign {
+
+        private AssignCenterCommand validCommand() {
+            return new AssignCenterCommand(
+                    UUID.randomUUID(), UUID.randomUUID(), 1_500_000L, "KRW"
+            );
+        }
+
+        @Test
+        @DisplayName("가용 센터가 있으면 슬롯을 예약하고 이벤트를 발행한다")
+        void assign_success_reservesSlotAndPublishesEvent() {
+            InspectionCenter center = centerWithLoad(10, 3);
+            given(centerRepository.findAvailableWithLock()).willReturn(Optional.of(center));
+            given(centerRepository.save(any(InspectionCenter.class))).willAnswer(inv -> inv.getArgument(0));
+
+            centerSlotService.assign(validCommand());
+
+            ArgumentCaptor<InspectionCenter> captor = ArgumentCaptor.forClass(InspectionCenter.class);
+            then(centerRepository).should().save(captor.capture());
+            assertThat(captor.getValue().getCurrentLoad()).isEqualTo(4);
+            then(slotEventPublisher).should().publish(any());
+        }
+
+        @Test
+        @DisplayName("가용 센터가 없으면 InspectionCenterException을 던지고 이벤트를 발행하지 않는다")
+        void assign_noAvailableCenter_throwsException() {
+            given(centerRepository.findAvailableWithLock()).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> centerSlotService.assign(validCommand()))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("예약 가능한 검수 센터가 없습니다");
+
+            then(slotEventPublisher).shouldHaveNoInteractions();
+        }
+
+        @Test
+        @DisplayName("센터가 만석이면 InspectionCenterException을 던지고 이벤트를 발행하지 않는다")
+        void assign_centerFull_throwsException() {
+            InspectionCenter center = centerWithLoad(5, 5);
+            given(centerRepository.findAvailableWithLock()).willReturn(Optional.of(center));
+
+            assertThatThrownBy(() -> centerSlotService.assign(validCommand()))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("수용량 초과");
+
+            then(slotEventPublisher).shouldHaveNoInteractions();
         }
     }
 
