@@ -3,7 +3,7 @@ package com.trustamarket.inspectionservice.inspection.domain.model;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.domain.enums.Grade;
 import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
-import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionType;
+
 import com.trustamarket.inspectionservice.inspection.domain.enums.PhotoType;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
@@ -30,7 +30,7 @@ public class Inspection {
     private final ProductId productId;
     private final SellerId sellerId;
     private final CenterId centerId;
-    private final InspectionType type;
+
     private final Money originalPrice;
     private final Instant requestedAt;
 
@@ -56,7 +56,6 @@ public class Inspection {
             ProductId productId,
             SellerId sellerId,
             CenterId centerId,
-            InspectionType type,
             Money originalPrice,
             Instant requestedAt,
             InspectionStatus status
@@ -65,7 +64,6 @@ public class Inspection {
         this.productId = Objects.requireNonNull(productId);
         this.sellerId = Objects.requireNonNull(sellerId);
         this.centerId = Objects.requireNonNull(centerId);
-        this.type = Objects.requireNonNull(type);
         this.originalPrice = Objects.requireNonNull(originalPrice);
         this.requestedAt = Objects.requireNonNull(requestedAt);
         this.status = Objects.requireNonNull(status);
@@ -76,7 +74,6 @@ public class Inspection {
             ProductId productId,
             SellerId sellerId,
             CenterId centerId,
-            InspectionType type,
             Money originalPrice,
             Instant requestedAt,
             InspectionStatus status,
@@ -94,7 +91,7 @@ public class Inspection {
             InspectionResultDetail resultDetail,
             List<InspectionPhoto> photos
     ) {
-        this(id, productId, sellerId, centerId, type, originalPrice, requestedAt, status);
+        this(id, productId, sellerId, centerId, originalPrice, requestedAt, status);
         this.inspectorId = inspectorId;
         this.arrivedAt = arrivedAt;
         this.startedAt = startedAt;
@@ -118,12 +115,11 @@ public class Inspection {
             ProductId productId,
             SellerId sellerId,
             CenterId centerId,
-            InspectionType type,
             Money originalPrice,
             Instant requestedAt
     ) {
         return new Inspection(
-                id, productId, sellerId, centerId, type, originalPrice, requestedAt,
+                id, productId, sellerId, centerId, originalPrice, requestedAt,
                 InspectionStatus.REQUESTED
         );
     }
@@ -289,7 +285,6 @@ public class Inspection {
             ProductId productId,
             SellerId sellerId,
             CenterId centerId,
-            InspectionType type,
             Money originalPrice,
             Instant requestedAt,
             InspectionStatus status,
@@ -308,7 +303,7 @@ public class Inspection {
             List<InspectionPhoto> photos
     ) {
         return new Inspection(
-                id, productId, sellerId, centerId, type, originalPrice, requestedAt, status,
+                id, productId, sellerId, centerId, originalPrice, requestedAt, status,
                 inspectorId, arrivedAt, startedAt, inspectionDoneAt, pricedAt, sellerDecidedAt,
                 grade, suggestedPrice, finalPrice, inspectorNote, rejectReason, resultDetail, photos
         );

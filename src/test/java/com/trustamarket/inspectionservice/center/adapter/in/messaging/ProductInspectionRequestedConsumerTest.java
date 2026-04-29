@@ -69,8 +69,7 @@ class ProductInspectionRequestedConsumerTest {
               "productId": "a1b2c3d4-0000-0000-0000-000000000001",
               "sellerId": "b2c3d4e5-0000-0000-0000-000000000002",
               "originalPrice": 1500000,
-              "currency": "KRW",
-              "inspectionType": "STANDARD"
+              "currency": "KRW"
             }
             """;
 
