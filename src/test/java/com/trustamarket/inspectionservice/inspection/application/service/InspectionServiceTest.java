@@ -3,6 +3,7 @@ package com.trustamarket.inspectionservice.inspection.application.service;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.FailInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
@@ -292,6 +293,7 @@ class InspectionServiceTest {
             assertThat(saved.getStatus()).isEqualTo(InspectionStatus.FAILED);
             assertThat(saved.getInspectorNote()).isEqualTo("심각한 손상 발견");
             assertThat(saved.getInspectionDoneAt()).isNotNull();
+            then(inspectionEventPublisher).should().publish(any(InspectionFailedEvent.class));
         }
 
         @Test
