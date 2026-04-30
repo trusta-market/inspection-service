@@ -1,0 +1,40 @@
+### 검수 실패 - 정상 (optional 포함)
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/fail
+Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
+
+{
+  "inspectorNote": "외부 가죽 심각한 박리 및 내부 오염 확인. 정품 인증 불가.",
+  "resultDetail": {
+    "leatherCondition": "불량",
+    "interiorCondition": "오염",
+    "authenticityVerified": false
+  }
+}
+
+### 검수 실패 - 정상 (optional 생략)
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/fail
+Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
+
+{
+  "inspectorNote": "시리얼 넘버 훼손으로 정품 확인 불가."
+}
+
+### 검수 실패 - inspectorNote 누락
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/fail
+Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
+
+{
+  "inspectorNote": "   "
+}
+
+### 검수 실패 - 존재하지 않는 inspectionId
+POST {{baseUrl}}/api/v1/admin/inspections/99999999-9999-9999-9999-999999999999/fail
+Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
+
+{
+  "inspectorNote": "심각한 손상 발견."
+}
