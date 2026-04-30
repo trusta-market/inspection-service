@@ -14,7 +14,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class KafkaInspectionCompletedPublisher {
+public class KafkaInspectionCompletedProducer {
 
     private static final String INSPECTION_COMPLETED_TOPIC = "inspection.completed";
     private static final String PRICING_COMPLETED_TOPIC = "pricing.completed";
