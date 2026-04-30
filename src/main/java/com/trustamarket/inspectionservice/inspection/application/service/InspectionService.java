@@ -11,6 +11,7 @@ import com.trustamarket.inspectionservice.inspection.application.dto.result.GetI
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
@@ -107,6 +108,11 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
                 Instant.now()
         );
         inspectionRepository.save(inspection);
+        inspectionEventPublisher.publish(new InspectionFailedEvent(
+                inspection.getId().value(),
+                inspection.getProductId().value(),
+                inspection.getSellerId().value()
+        ));
     }
 
     @Override
