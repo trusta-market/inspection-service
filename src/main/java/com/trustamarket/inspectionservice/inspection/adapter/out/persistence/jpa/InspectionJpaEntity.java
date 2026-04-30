@@ -76,7 +76,6 @@ public class InspectionJpaEntity implements Persistable<UUID> {
     private Instant startedAt;
     private Instant inspectionDoneAt;
     private Instant pricedAt;
-    private Instant sellerDecidedAt;
     private Instant returnCompletedAt;
 
     @Enumerated(EnumType.STRING)
@@ -88,17 +87,8 @@ public class InspectionJpaEntity implements Persistable<UUID> {
     @Enumerated(EnumType.STRING)
     private CurrencyCode suggestedPriceCurrency;
 
-    @Column(precision = 19, scale = 2)
-    private BigDecimal finalPriceAmount;
-
-    @Enumerated(EnumType.STRING)
-    private CurrencyCode finalPriceCurrency;
-
     @Column(columnDefinition = "text")
     private String inspectorNote;
-
-    @Column(columnDefinition = "text")
-    private String rejectReason;
 
     @Convert(converter = InspectionResultDetailConverter.class)
     @Column(columnDefinition = "text")
@@ -145,15 +135,11 @@ public class InspectionJpaEntity implements Persistable<UUID> {
             Instant startedAt,
             Instant inspectionDoneAt,
             Instant pricedAt,
-            Instant sellerDecidedAt,
             Instant returnCompletedAt,
             Grade grade,
             BigDecimal suggestedPriceAmount,
             CurrencyCode suggestedPriceCurrency,
-            BigDecimal finalPriceAmount,
-            CurrencyCode finalPriceCurrency,
             String inspectorNote,
-            String rejectReason,
             InspectionResultDetail resultDetail
     ) {
         this.status = status;
@@ -162,15 +148,11 @@ public class InspectionJpaEntity implements Persistable<UUID> {
         this.startedAt = startedAt;
         this.inspectionDoneAt = inspectionDoneAt;
         this.pricedAt = pricedAt;
-        this.sellerDecidedAt = sellerDecidedAt;
         this.returnCompletedAt = returnCompletedAt;
         this.grade = grade;
         this.suggestedPriceAmount = suggestedPriceAmount;
         this.suggestedPriceCurrency = suggestedPriceCurrency;
-        this.finalPriceAmount = finalPriceAmount;
-        this.finalPriceCurrency = finalPriceCurrency;
         this.inspectorNote = inspectorNote;
-        this.rejectReason = rejectReason;
         this.resultDetail = resultDetail;
     }
 

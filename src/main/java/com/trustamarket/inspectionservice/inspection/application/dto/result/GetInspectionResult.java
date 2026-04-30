@@ -20,19 +20,15 @@ public record GetInspectionResult(
         String originalPriceCurrency,
         Long suggestedPriceAmount,
         String suggestedPriceCurrency,
-        Long finalPriceAmount,
-        String finalPriceCurrency,
         InspectionStatus status,
         Grade grade,
         String inspectorNote,
-        String rejectReason,
         InspectionResultDetail resultDetail,
         Instant requestedAt,
         Instant arrivedAt,
         Instant startedAt,
         Instant inspectionDoneAt,
         Instant pricedAt,
-        Instant sellerDecidedAt,
         List<InspectionPhoto> photos
 ) {
     public static GetInspectionResult from(Inspection inspection) {
@@ -46,19 +42,15 @@ public record GetInspectionResult(
                 inspection.getOriginalPrice().currency().name(),
                 inspection.getSuggestedPrice() != null ? inspection.getSuggestedPrice().amount().longValue() : null,
                 inspection.getSuggestedPrice() != null ? inspection.getSuggestedPrice().currency().name() : null,
-                inspection.getFinalPrice() != null ? inspection.getFinalPrice().amount().longValue() : null,
-                inspection.getFinalPrice() != null ? inspection.getFinalPrice().currency().name() : null,
                 inspection.getStatus(),
                 inspection.getGrade(),
                 inspection.getInspectorNote(),
-                inspection.getRejectReason(),
                 inspection.getResultDetail(),
                 inspection.getRequestedAt(),
                 inspection.getArrivedAt(),
                 inspection.getStartedAt(),
                 inspection.getInspectionDoneAt(),
                 inspection.getPricedAt(),
-                inspection.getSellerDecidedAt(),
                 inspection.getPhotos()
         );
     }
