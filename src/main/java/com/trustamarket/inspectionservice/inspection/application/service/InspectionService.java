@@ -2,6 +2,7 @@ package com.trustamarket.inspectionservice.inspection.application.service;
 
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.FailInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
@@ -13,6 +14,7 @@ import com.trustamarket.inspectionservice.inspection.application.event.Inspectio
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.in.FailInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.GetInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.MarkArrivedUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.RequestInspectionUseCase;
@@ -40,7 +42,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class InspectionService implements RequestInspectionUseCase, MarkArrivedUseCase, StartInspectionUseCase,
-        CompleteInspectionUseCase, GetInspectionUseCase {
+        CompleteInspectionUseCase, FailInspectionUseCase, GetInspectionUseCase {
 
     private final InspectionRepository inspectionRepository;
     private final InspectionEventPublisher inspectionEventPublisher;
@@ -92,6 +94,19 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
                 inspection.getSuggestedPrice().amount().longValue(),
                 inspection.getSuggestedPrice().currency().name()
         ));
+    }
+
+    @Override
+    @Transactional
+    public void fail(FailInspectionCommand command) {
+        Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
+                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: inspectionId=" + command.inspectionId()));
+        inspection.failInspection(
+                command.inspectorNote(),
+                command.resultDetail() != null ? new InspectionResultDetail(command.resultDetail()) : InspectionResultDetail.empty(),
+                Instant.now()
+        );
+        inspectionRepository.save(inspection);
     }
 
     @Override
