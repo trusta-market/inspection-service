@@ -3,6 +3,7 @@ package com.trustamarket.inspectionservice.inspection.adapter.out.persistence.jp
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,14 +18,21 @@ public class InspectionRepositoryImpl implements InspectionRepository {
 
     @Override
     public Inspection save(Inspection inspection) {
-        InspectionJpaEntity entity = jpaRepository.findByInspectionIdAndDeletedAtIsNull(inspection.getId().value())
-                .map(existing -> mapper.updateJpaEntity(existing, inspection))
-                .orElseGet(() -> mapper.toJpaEntity(inspection));
-        return mapper.toDomain(jpaRepository.save(entity));
+        Optional<InspectionJpaEntity> existing = jpaRepository.findById(inspection.getId().value());
+        if (existing.isPresent()) {
+            mapper.updateJpaEntity(existing.get(), inspection);
+            return mapper.toDomain(existing.get());
+        }
+        return mapper.toDomain(jpaRepository.save(mapper.toJpaEntity(inspection)));
     }
 
     @Override
     public Optional<Inspection> findById(InspectionId id) {
         return jpaRepository.findByInspectionIdAndDeletedAtIsNull(id.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Inspection> findByProductId(ProductId productId) {
+        return jpaRepository.findByProductIdAndDeletedAtIsNull(productId.value()).map(mapper::toDomain);
     }
 }
