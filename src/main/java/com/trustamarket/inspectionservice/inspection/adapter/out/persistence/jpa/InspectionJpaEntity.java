@@ -77,6 +77,7 @@ public class InspectionJpaEntity implements Persistable<UUID> {
     private Instant inspectionDoneAt;
     private Instant pricedAt;
     private Instant sellerDecidedAt;
+    private Instant returnCompletedAt;
 
     @Enumerated(EnumType.STRING)
     private Grade grade;
@@ -145,6 +146,7 @@ public class InspectionJpaEntity implements Persistable<UUID> {
             Instant inspectionDoneAt,
             Instant pricedAt,
             Instant sellerDecidedAt,
+            Instant returnCompletedAt,
             Grade grade,
             BigDecimal suggestedPriceAmount,
             CurrencyCode suggestedPriceCurrency,
@@ -161,6 +163,7 @@ public class InspectionJpaEntity implements Persistable<UUID> {
         this.inspectionDoneAt = inspectionDoneAt;
         this.pricedAt = pricedAt;
         this.sellerDecidedAt = sellerDecidedAt;
+        this.returnCompletedAt = returnCompletedAt;
         this.grade = grade;
         this.suggestedPriceAmount = suggestedPriceAmount;
         this.suggestedPriceCurrency = suggestedPriceCurrency;

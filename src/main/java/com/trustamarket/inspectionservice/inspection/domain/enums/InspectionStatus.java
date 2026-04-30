@@ -7,9 +7,10 @@ public enum InspectionStatus {
     PRICED,
     ACCEPTED,
     REJECTED,
-    FAILED;
+    FAILED,
+    RETURN_COMPLETED;
 
     public boolean isTerminal() {
-        return this == ACCEPTED || this == REJECTED || this == FAILED;
+        return this == ACCEPTED || this == REJECTED || this == RETURN_COMPLETED;
     }
 }
