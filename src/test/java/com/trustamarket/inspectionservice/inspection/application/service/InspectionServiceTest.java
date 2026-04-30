@@ -1,9 +1,17 @@
 package com.trustamarket.inspectionservice.inspection.application.service;
 
+import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
+import com.trustamarket.inspectionservice.inspection.domain.enums.CurrencyCode;
 import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
+import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.Money;
+import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.SellerId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,9 +21,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -35,6 +46,17 @@ class InspectionServiceTest {
 
     private RequestInspectionCommand validCommand() {
         return new RequestInspectionCommand(PRODUCT_ID, SELLER_ID, CENTER_ID, 1_500_000L, "KRW");
+    }
+
+    private Inspection requestedInspection() {
+        return Inspection.request(
+                InspectionId.generate(),
+                ProductId.of(PRODUCT_ID),
+                SellerId.of(SELLER_ID),
+                CenterId.of(CENTER_ID),
+                Money.of(1_500_000L, CurrencyCode.KRW),
+                Instant.now()
+        );
     }
 
     @Nested
@@ -73,6 +95,37 @@ class InspectionServiceTest {
             UUID first  = captor.getAllValues().get(0).getId().value();
             UUID second = captor.getAllValues().get(1).getId().value();
             assertThat(first).isNotEqualTo(second);
+        }
+    }
+
+    @Nested
+    @DisplayName("도착 확인 (markArrived)")
+    class MarkArrived {
+
+        @Test
+        @DisplayName("REQUESTED 상태의 검수 요청을 ARRIVED로 전이하고 저장한다")
+        void markArrived_success() {
+            Inspection inspection = requestedInspection();
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID))).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.markArrived(new MarkArrivedCommand(PRODUCT_ID));
+
+            ArgumentCaptor<Inspection> captor = ArgumentCaptor.forClass(Inspection.class);
+            then(inspectionRepository).should().save(captor.capture());
+            Inspection saved = captor.getValue();
+            assertThat(saved.getStatus()).isEqualTo(InspectionStatus.ARRIVED);
+            assertThat(saved.getArrivedAt()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("productId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
+        void markArrived_notFound_throwsException() {
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionService.markArrived(new MarkArrivedCommand(PRODUCT_ID)))
+                    .isInstanceOf(InspectionException.class)
+                    .hasMessageContaining(PRODUCT_ID.toString());
         }
     }
 }
