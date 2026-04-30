@@ -1,0 +1,21 @@
+### 검수 시작 - 정상
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/start
+Content-Type: application/json
+
+{
+  "inspectorId": "00000000-0000-0000-0000-000000000099"
+}
+
+### 검수 시작 - 존재하지 않는 inspectionId
+POST {{baseUrl}}/api/v1/admin/inspections/99999999-9999-9999-9999-999999999999/start
+Content-Type: application/json
+
+{
+  "inspectorId": "00000000-0000-0000-0000-000000000099"
+}
+
+### 검수 시작 - inspectorId 누락
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/start
+Content-Type: application/json
+
+{}
