@@ -4,6 +4,9 @@ import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.query.GetMyInspectionsQuery;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionPageResult;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
@@ -25,12 +28,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -183,6 +189,77 @@ class InspectionServiceTest {
 
             assertThatThrownBy(() -> inspectionService.start(new StartInspectionCommand(inspection.getId().value(), INSPECTOR_ID)))
                     .isInstanceOf(InspectionException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("내 검수 목록 조회 (getMyInspections)")
+    class GetMyInspections {
+
+        @Test
+        @DisplayName("셀러의 검수 목록을 페이징하여 반환한다")
+        void getMyInspections_success() {
+            Inspection inspection = requestedInspection();
+            SellerId sellerId = SellerId.of(SELLER_ID);
+            given(inspectionRepository.findBySellerId(eq(sellerId), anyInt(), anyInt()))
+                    .willReturn(List.of(inspection));
+            given(inspectionRepository.countBySellerId(sellerId)).willReturn(1L);
+
+            GetInspectionPageResult result = inspectionService.getMyInspections(
+                    new GetMyInspectionsQuery(SELLER_ID, 0, 10));
+
+            assertThat(result.content()).hasSize(1);
+            assertThat(result.content().get(0).inspectionId()).isEqualTo(inspection.getId().value());
+            assertThat(result.page()).isZero();
+            assertThat(result.size()).isEqualTo(10);
+            assertThat(result.totalElements()).isEqualTo(1L);
+            assertThat(result.totalPages()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("검수 요청이 없으면 빈 목록을 반환한다")
+        void getMyInspections_empty() {
+            SellerId sellerId = SellerId.of(SELLER_ID);
+            given(inspectionRepository.findBySellerId(eq(sellerId), anyInt(), anyInt()))
+                    .willReturn(List.of());
+            given(inspectionRepository.countBySellerId(sellerId)).willReturn(0L);
+
+            GetInspectionPageResult result = inspectionService.getMyInspections(
+                    new GetMyInspectionsQuery(SELLER_ID, 0, 10));
+
+            assertThat(result.content()).isEmpty();
+            assertThat(result.totalElements()).isZero();
+            assertThat(result.totalPages()).isZero();
+        }
+    }
+
+    @Nested
+    @DisplayName("검수 상세 조회 (getInspection)")
+    class GetInspection {
+
+        @Test
+        @DisplayName("inspectionId로 검수 상세 정보를 반환한다")
+        void getInspection_success() {
+            Inspection inspection = requestedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            GetInspectionResult result = inspectionService.getInspection(inspection.getId().value());
+
+            assertThat(result.inspectionId()).isEqualTo(inspection.getId().value());
+            assertThat(result.productId()).isEqualTo(PRODUCT_ID);
+            assertThat(result.sellerId()).isEqualTo(SELLER_ID);
+            assertThat(result.status()).isEqualTo(InspectionStatus.REQUESTED);
+        }
+
+        @Test
+        @DisplayName("inspectionId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
+        void getInspection_notFound_throwsException() {
+            UUID unknownId = UUID.randomUUID();
+            given(inspectionRepository.findById(InspectionId.of(unknownId))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionService.getInspection(unknownId))
+                    .isInstanceOf(InspectionException.class)
+                    .hasMessageContaining(unknownId.toString());
         }
     }
 }
