@@ -2,6 +2,7 @@ package com.trustamarket.inspectionservice.inspection.application.service;
 
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.FailInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
@@ -268,6 +269,59 @@ class InspectionServiceTest {
             given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
 
             assertThatThrownBy(() -> inspectionService.complete(validCommand(inspection.getId().value())))
+                    .isInstanceOf(InspectionException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("검수 실패 (fail)")
+    class Fail {
+
+        @Test
+        @DisplayName("IN_PROGRESS 상태의 검수를 FAILED로 전이하고 저장한다")
+        void fail_success() {
+            Inspection inspection = inProgressInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.fail(new FailInspectionCommand(inspection.getId().value(), "심각한 손상 발견", null));
+
+            ArgumentCaptor<Inspection> captor = ArgumentCaptor.forClass(Inspection.class);
+            then(inspectionRepository).should().save(captor.capture());
+            Inspection saved = captor.getValue();
+            assertThat(saved.getStatus()).isEqualTo(InspectionStatus.FAILED);
+            assertThat(saved.getInspectorNote()).isEqualTo("심각한 손상 발견");
+            assertThat(saved.getInspectionDoneAt()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("inspectionId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
+        void fail_notFound_throwsException() {
+            UUID unknownId = UUID.randomUUID();
+            given(inspectionRepository.findById(InspectionId.of(unknownId))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionService.fail(new FailInspectionCommand(unknownId, "손상", null)))
+                    .isInstanceOf(InspectionException.class)
+                    .hasMessageContaining(unknownId.toString());
+        }
+
+        @Test
+        @DisplayName("IN_PROGRESS 상태가 아니면 InspectionException을 던진다")
+        void fail_wrongStatus_throwsException() {
+            Inspection inspection = arrivedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            assertThatThrownBy(() -> inspectionService.fail(new FailInspectionCommand(inspection.getId().value(), "손상", null)))
+                    .isInstanceOf(InspectionException.class);
+        }
+
+        @Test
+        @DisplayName("inspectorNote가 blank이면 InspectionException을 던진다")
+        void fail_blankNote_throwsException() {
+            Inspection inspection = inProgressInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            assertThatThrownBy(() -> inspectionService.fail(new FailInspectionCommand(inspection.getId().value(), "  ", null)))
                     .isInstanceOf(InspectionException.class);
         }
     }
