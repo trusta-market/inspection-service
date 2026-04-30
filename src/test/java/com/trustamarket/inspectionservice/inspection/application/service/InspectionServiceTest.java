@@ -3,6 +3,9 @@ package com.trustamarket.inspectionservice.inspection.application.service;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
+import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
 import com.trustamarket.inspectionservice.inspection.domain.enums.CurrencyCode;
 import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
@@ -37,12 +40,16 @@ class InspectionServiceTest {
     @Mock
     private InspectionRepository inspectionRepository;
 
+    @Mock
+    private InspectionEventPublisher inspectionEventPublisher;
+
     @InjectMocks
     private InspectionService inspectionService;
 
-    private static final UUID PRODUCT_ID = UUID.fromString("a1b2c3d4-0000-0000-0000-000000000001");
-    private static final UUID SELLER_ID  = UUID.fromString("b2c3d4e5-0000-0000-0000-000000000002");
-    private static final UUID CENTER_ID  = UUID.fromString("c3d4e5f6-0000-0000-0000-000000000003");
+    private static final UUID PRODUCT_ID   = UUID.fromString("a1b2c3d4-0000-0000-0000-000000000001");
+    private static final UUID SELLER_ID    = UUID.fromString("b2c3d4e5-0000-0000-0000-000000000002");
+    private static final UUID CENTER_ID    = UUID.fromString("c3d4e5f6-0000-0000-0000-000000000003");
+    private static final UUID INSPECTOR_ID = UUID.fromString("d4e5f6a7-0000-0000-0000-000000000004");
 
     private RequestInspectionCommand validCommand() {
         return new RequestInspectionCommand(PRODUCT_ID, SELLER_ID, CENTER_ID, 1_500_000L, "KRW");
@@ -57,6 +64,12 @@ class InspectionServiceTest {
                 Money.of(1_500_000L, CurrencyCode.KRW),
                 Instant.now()
         );
+    }
+
+    private Inspection arrivedInspection() {
+        Inspection inspection = requestedInspection();
+        inspection.markArrived(Instant.now());
+        return inspection;
     }
 
     @Nested
@@ -126,6 +139,50 @@ class InspectionServiceTest {
             assertThatThrownBy(() -> inspectionService.markArrived(new MarkArrivedCommand(PRODUCT_ID)))
                     .isInstanceOf(InspectionException.class)
                     .hasMessageContaining(PRODUCT_ID.toString());
+        }
+    }
+
+    @Nested
+    @DisplayName("검수 시작 (start)")
+    class Start {
+
+        @Test
+        @DisplayName("ARRIVED 상태의 검수 요청을 IN_PROGRESS로 전이하고 이벤트를 발행한다")
+        void start_success() {
+            Inspection inspection = arrivedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.start(new StartInspectionCommand(inspection.getId().value(), INSPECTOR_ID));
+
+            ArgumentCaptor<Inspection> captor = ArgumentCaptor.forClass(Inspection.class);
+            then(inspectionRepository).should().save(captor.capture());
+            Inspection saved = captor.getValue();
+            assertThat(saved.getStatus()).isEqualTo(InspectionStatus.IN_PROGRESS);
+            assertThat(saved.getInspectorId().value()).isEqualTo(INSPECTOR_ID);
+            assertThat(saved.getStartedAt()).isNotNull();
+            then(inspectionEventPublisher).should().publish(any(InspectionStartedEvent.class));
+        }
+
+        @Test
+        @DisplayName("inspectionId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
+        void start_notFound_throwsException() {
+            UUID unknownId = UUID.randomUUID();
+            given(inspectionRepository.findById(InspectionId.of(unknownId))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionService.start(new StartInspectionCommand(unknownId, INSPECTOR_ID)))
+                    .isInstanceOf(InspectionException.class)
+                    .hasMessageContaining(unknownId.toString());
+        }
+
+        @Test
+        @DisplayName("ARRIVED 상태가 아니면 InspectionException을 던진다")
+        void start_wrongStatus_throwsException() {
+            Inspection inspection = requestedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            assertThatThrownBy(() -> inspectionService.start(new StartInspectionCommand(inspection.getId().value(), INSPECTOR_ID)))
+                    .isInstanceOf(InspectionException.class);
         }
     }
 }
