@@ -4,8 +4,5 @@ import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
 
 import java.util.UUID;
 
-public record RegisterCenterResult(
-        UUID centerId,
-        String name,
-        CenterStatus status
-) {}
+public record ChangeCenterStatusResult(UUID centerId, CenterStatus status) {
+}

@@ -1,7 +1,9 @@
 package com.trustamarket.inspectionservice.center.application.service;
 
 import com.trustamarket.inspectionservice.center.application.dto.command.RegisterCenterCommand;
+import com.trustamarket.inspectionservice.center.application.dto.result.ChangeCenterStatusResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.RegisterCenterResult;
+import com.trustamarket.inspectionservice.center.application.port.in.ChangeCenterStatusUseCase;
 import com.trustamarket.inspectionservice.center.application.port.in.RegisterCenterUseCase;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
@@ -12,9 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
-public class InspectionCenterService implements RegisterCenterUseCase {
+public class InspectionCenterService implements RegisterCenterUseCase, ChangeCenterStatusUseCase {
 
     private final InspectionCenterRepository inspectionCenterRepository;
 
@@ -47,5 +51,37 @@ public class InspectionCenterService implements RegisterCenterUseCase {
                 saved.getName(),
                 saved.getStatus()
         );
+    }
+
+    @Override
+    @Transactional
+    public ChangeCenterStatusResult open(UUID centerId) {
+        InspectionCenter center = findCenterOrThrow(centerId);
+        center.open();
+        InspectionCenter saved = inspectionCenterRepository.save(center);
+        return new ChangeCenterStatusResult(saved.getId().value(), saved.getStatus());
+    }
+
+    @Override
+    @Transactional
+    public ChangeCenterStatusResult startMaintenance(UUID centerId) {
+        InspectionCenter center = findCenterOrThrow(centerId);
+        center.startMaintenance();
+        InspectionCenter saved = inspectionCenterRepository.save(center);
+        return new ChangeCenterStatusResult(saved.getId().value(), saved.getStatus());
+    }
+
+    @Override
+    @Transactional
+    public ChangeCenterStatusResult close(UUID centerId) {
+        InspectionCenter center = findCenterOrThrow(centerId);
+        center.close();
+        InspectionCenter saved = inspectionCenterRepository.save(center);
+        return new ChangeCenterStatusResult(saved.getId().value(), saved.getStatus());
+    }
+
+    private InspectionCenter findCenterOrThrow(UUID centerId) {
+        return inspectionCenterRepository.findById(CenterId.of(centerId))
+                .orElseThrow(() -> new InspectionCenterException("존재하지 않는 센터입니다: " + centerId));
     }
 }

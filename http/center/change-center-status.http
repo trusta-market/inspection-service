@@ -1,0 +1,17 @@
+### 센터 오픈 - 정상
+POST {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001/open
+
+### 센터 오픈 - Not Found
+POST {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000999/open
+
+### 센터 유지보수 전환 - 정상
+POST {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001/maintenance
+
+### 센터 유지보수 전환 - Not Found
+POST {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000999/maintenance
+
+### 센터 폐쇄 - 정상
+POST {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001/close
+
+### 센터 폐쇄 - Not Found
+POST {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000999/close

@@ -1,4 +1,4 @@
-package com.trustamarket.inspectionservice.center.domain.model.enums;
+package com.trustamarket.inspectionservice.center.domain.enums;
 
 import java.util.EnumSet;
 import java.util.Set;
