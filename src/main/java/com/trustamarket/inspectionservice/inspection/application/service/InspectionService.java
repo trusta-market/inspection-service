@@ -4,7 +4,12 @@ import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.query.GetMyInspectionsQuery;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionPageResult;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
+import com.trustamarket.inspectionservice.inspection.application.port.in.GetInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.MarkArrivedUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.RequestInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.StartInspectionUseCase;
@@ -23,10 +28,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class InspectionService implements RequestInspectionUseCase, MarkArrivedUseCase, StartInspectionUseCase {
+public class InspectionService implements RequestInspectionUseCase, MarkArrivedUseCase, StartInspectionUseCase,
+        GetInspectionUseCase {
 
     private final InspectionRepository inspectionRepository;
     private final InspectionEventPublisher inspectionEventPublisher;
@@ -65,5 +73,28 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
                 inspection.getId().value(),
                 inspection.getProductId().value()
         ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetInspectionPageResult getMyInspections(GetMyInspectionsQuery query) {
+        SellerId sellerId = SellerId.of(query.userId());
+        List<Inspection> inspections = inspectionRepository.findBySellerId(sellerId, query.page(), query.size());
+        long total = inspectionRepository.countBySellerId(sellerId);
+        int totalPages = (int) Math.ceil((double) total / query.size());
+
+        List<GetInspectionSummaryResult> content = inspections.stream()
+                .map(GetInspectionSummaryResult::from)
+                .toList();
+
+        return new GetInspectionPageResult(content, query.page(), query.size(), total, totalPages);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetInspectionResult getInspection(UUID inspectionId) {
+        Inspection inspection = inspectionRepository.findById(InspectionId.of(inspectionId))
+                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: inspectionId=" + inspectionId));
+        return GetInspectionResult.from(inspection);
     }
 }
