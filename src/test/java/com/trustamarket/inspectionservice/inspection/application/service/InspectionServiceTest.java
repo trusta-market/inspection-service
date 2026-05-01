@@ -2,8 +2,10 @@ package com.trustamarket.inspectionservice.inspection.application.service;
 
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteReturnCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.FailInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionReturnCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
@@ -88,6 +90,12 @@ class InspectionServiceTest {
     private Inspection inProgressInspection() {
         Inspection inspection = arrivedInspection();
         inspection.start(InspectorId.of(INSPECTOR_ID), Instant.now());
+        return inspection;
+    }
+
+    private Inspection failedInspection() {
+        Inspection inspection = inProgressInspection();
+        inspection.failInspection("심각한 손상 발견", null, Instant.now());
         return inspection;
     }
 
@@ -324,6 +332,65 @@ class InspectionServiceTest {
             given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
 
             assertThatThrownBy(() -> inspectionService.fail(new FailInspectionCommand(inspection.getId().value(), "  ", null)))
+                    .isInstanceOf(InspectionException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("반송 완료 (completeReturn)")
+    class CompleteReturn {
+
+        @Test
+        @DisplayName("FAILED 상태의 검수를 RETURN_COMPLETED로 전이하고 이벤트를 발행한다")
+        void completeReturn_success() {
+            Inspection inspection = failedInspection();
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID))).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.completeReturn(new CompleteReturnCommand(PRODUCT_ID));
+
+            ArgumentCaptor<Inspection> captor = ArgumentCaptor.forClass(Inspection.class);
+            then(inspectionRepository).should().save(captor.capture());
+            Inspection saved = captor.getValue();
+            assertThat(saved.getStatus()).isEqualTo(InspectionStatus.RETURN_COMPLETED);
+            assertThat(saved.getReturnCompletedAt()).isNotNull();
+            then(inspectionEventPublisher).should().publish(any(InspectionReturnCompletedEvent.class));
+        }
+
+        @Test
+        @DisplayName("InspectionReturnCompletedEvent에 inspectionId, productId, sellerId가 포함된다")
+        void completeReturn_event_containsIds() {
+            Inspection inspection = failedInspection();
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID))).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.completeReturn(new CompleteReturnCommand(PRODUCT_ID));
+
+            ArgumentCaptor<InspectionReturnCompletedEvent> captor = ArgumentCaptor.forClass(InspectionReturnCompletedEvent.class);
+            then(inspectionEventPublisher).should().publish(captor.capture());
+            InspectionReturnCompletedEvent event = captor.getValue();
+            assertThat(event.productId()).isEqualTo(PRODUCT_ID);
+            assertThat(event.sellerId()).isEqualTo(SELLER_ID);
+            assertThat(event.inspectionId()).isEqualTo(inspection.getId().value());
+        }
+
+        @Test
+        @DisplayName("productId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
+        void completeReturn_notFound_throwsException() {
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionService.completeReturn(new CompleteReturnCommand(PRODUCT_ID)))
+                    .isInstanceOf(InspectionException.class)
+                    .hasMessageContaining(PRODUCT_ID.toString());
+        }
+
+        @Test
+        @DisplayName("FAILED 상태가 아니면 InspectionException을 던진다")
+        void completeReturn_wrongStatus_throwsException() {
+            Inspection inspection = inProgressInspection();
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID))).willReturn(Optional.of(inspection));
+
+            assertThatThrownBy(() -> inspectionService.completeReturn(new CompleteReturnCommand(PRODUCT_ID)))
                     .isInstanceOf(InspectionException.class);
         }
     }
