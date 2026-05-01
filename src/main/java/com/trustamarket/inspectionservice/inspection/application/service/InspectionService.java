@@ -2,6 +2,7 @@ package com.trustamarket.inspectionservice.inspection.application.service;
 
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteReturnCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.FailInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
@@ -12,9 +13,11 @@ import com.trustamarket.inspectionservice.inspection.application.dto.result.GetI
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionReturnCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteReturnUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.FailInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.GetInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.MarkArrivedUseCase;
@@ -43,7 +46,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class InspectionService implements RequestInspectionUseCase, MarkArrivedUseCase, StartInspectionUseCase,
-        CompleteInspectionUseCase, FailInspectionUseCase, GetInspectionUseCase {
+        CompleteInspectionUseCase, FailInspectionUseCase, CompleteReturnUseCase, GetInspectionUseCase {
 
     private final InspectionRepository inspectionRepository;
     private final InspectionEventPublisher inspectionEventPublisher;
@@ -125,6 +128,20 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
         inspectionEventPublisher.publish(new InspectionStartedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value()
+        ));
+    }
+
+    @Override
+    @Transactional
+    public void completeReturn(CompleteReturnCommand command) {
+        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: productId=" + command.productId()));
+        inspection.completeReturn(Instant.now());
+        inspectionRepository.save(inspection);
+        inspectionEventPublisher.publish(new InspectionReturnCompletedEvent(
+                inspection.getId().value(),
+                inspection.getProductId().value(),
+                inspection.getSellerId().value()
         ));
     }
 
