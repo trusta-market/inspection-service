@@ -18,18 +18,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class DeliveryCompletedConsumerTest {
+class CarrierDeliveryCompletedConsumerTest {
 
     @Mock
     private MarkArrivedUseCase markArrivedUseCase;
 
-    private DeliveryCompletedConsumer consumer;
+    private CarrierDeliveryCompletedConsumer consumer;
 
     private static final UUID PRODUCT_ID = UUID.fromString("a1b2c3d4-0000-0000-0000-000000000001");
 
     @BeforeEach
     void setUp() {
-        consumer = new DeliveryCompletedConsumer(markArrivedUseCase, new ObjectMapper());
+        consumer = new CarrierDeliveryCompletedConsumer(markArrivedUseCase, new ObjectMapper());
     }
 
     @Test
