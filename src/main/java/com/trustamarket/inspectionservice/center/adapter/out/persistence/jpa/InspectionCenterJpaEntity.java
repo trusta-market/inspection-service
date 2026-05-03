@@ -49,12 +49,6 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
 
     private String contactPhone;
 
-    @Column(nullable = false)
-    private int capacity;
-
-    @Column(nullable = false)
-    private int currentLoad;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CenterStatus status;
@@ -97,8 +91,6 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
             String city,
             String postalCode,
             String contactPhone,
-            int capacity,
-            int currentLoad,
             CenterStatus status
     ) {
         this.name = name;
@@ -107,8 +99,6 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
         this.city = city;
         this.postalCode = postalCode;
         this.contactPhone = contactPhone;
-        this.capacity = capacity;
-        this.currentLoad = currentLoad;
         this.status = status;
     }
 
@@ -120,8 +110,6 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
             String city,
             String postalCode,
             String contactPhone,
-            int capacity,
-            int currentLoad,
             CenterStatus status
     ) {
         InspectionCenterJpaEntity entity = new InspectionCenterJpaEntity();
@@ -132,8 +120,6 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
         entity.city = city;
         entity.postalCode = postalCode;
         entity.contactPhone = contactPhone;
-        entity.capacity = capacity;
-        entity.currentLoad = currentLoad;
         entity.status = status;
         return entity;
     }

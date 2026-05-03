@@ -12,8 +12,6 @@ public record GetCenterResponse(
         String city,
         String postalCode,
         String contactPhone,
-        int capacity,
-        int currentLoad,
         String status
 ) {
     public static GetCenterResponse from(GetCenterResult result) {
@@ -25,8 +23,6 @@ public record GetCenterResponse(
                 result.city(),
                 result.postalCode(),
                 result.contactPhone(),
-                result.capacity(),
-                result.currentLoad(),
                 result.status().name()
         );
     }

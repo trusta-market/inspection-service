@@ -12,18 +12,18 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CenterSlotAssignedConsumer {
+public class InspectionRequestedConsumer {
 
     private final RequestInspectionUseCase requestInspectionUseCase;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "center.slot-assigned", groupId = "inspection-service")
+    @KafkaListener(topics = "inspection.requested", groupId = "inspection-service")
     public void consume(String payload) {
-        CenterSlotAssignedEvent event;
+        InspectionRequestedEvent event;
         try {
-            event = objectMapper.readValue(payload, CenterSlotAssignedEvent.class);
+            event = objectMapper.readValue(payload, InspectionRequestedEvent.class);
         } catch (JsonProcessingException e) {
-            log.error("center.slot-assigned 이벤트 역직렬화 실패: payload={}", payload, e);
+            log.error("inspection.requested 이벤트 역직렬화 실패: payload={}", payload, e);
             throw new RuntimeException(e);
         }
 

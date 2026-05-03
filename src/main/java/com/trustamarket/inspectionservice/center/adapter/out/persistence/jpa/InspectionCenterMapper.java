@@ -17,8 +17,6 @@ public class InspectionCenterMapper {
                 center.getAddress().city(),
                 center.getAddress().postalCode(),
                 center.getContactPhone(),
-                center.getCapacity(),
-                center.getCurrentLoad(),
                 center.getStatus()
         );
     }
@@ -31,8 +29,6 @@ public class InspectionCenterMapper {
                 center.getAddress().city(),
                 center.getAddress().postalCode(),
                 center.getContactPhone(),
-                center.getCapacity(),
-                center.getCurrentLoad(),
                 center.getStatus()
         );
         return existing;
@@ -44,8 +40,6 @@ public class InspectionCenterMapper {
                 entity.getName(),
                 new Address(entity.getAddressLine1(), entity.getAddressLine2(), entity.getCity(), entity.getPostalCode()),
                 entity.getContactPhone(),
-                entity.getCapacity(),
-                entity.getCurrentLoad(),
                 entity.getStatus()
         );
     }

@@ -45,8 +45,7 @@ public class InspectionCenterService implements InspectionCenterUseCase {
                 CenterId.generate(),
                 command.name(),
                 address,
-                command.contactPhone(),
-                command.capacity()
+                command.contactPhone()
         );
 
         InspectionCenter saved = inspectionCenterRepository.save(center);
@@ -65,7 +64,6 @@ public class InspectionCenterService implements InspectionCenterUseCase {
         center.rename(command.name());
         center.relocate(new Address(command.addressLine1(), command.addressLine2(), command.city(), command.postalCode()));
         center.updateContactPhone(command.contactPhone());
-        center.updateCapacity(command.capacity());
         InspectionCenter saved = inspectionCenterRepository.save(center);
         return UpdateCenterResult.from(saved);
     }
