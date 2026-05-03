@@ -1,6 +1,7 @@
 package com.trustamarket.inspectionservice.center.domain.model;
 
 import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
+import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterErrorCode;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
 import com.trustamarket.inspectionservice.center.domain.vo.Address;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
@@ -65,7 +66,7 @@ public class InspectionCenter {
     private void transitionTo(CenterStatus target) {
         if (!this.status.canTransitionTo(target)) {
             throw new InspectionCenterException(
-                    this.status + " → " + target + " 전이는 허용되지 않습니다"
+                    InspectionCenterErrorCode.INVALID_STATUS_TRANSITION, this.status + " → " + target
             );
         }
         this.status = target;
@@ -73,7 +74,9 @@ public class InspectionCenter {
 
     public void validateDeletable() {
         if (this.status != CenterStatus.CLOSED) {
-            throw new InspectionCenterException("센터 삭제는 CLOSED 상태에서만 가능합니다 (현재: " + this.status + ")");
+            throw new InspectionCenterException(
+                    InspectionCenterErrorCode.CENTER_NOT_DELETABLE, "현재: " + this.status
+            );
         }
     }
 
@@ -87,7 +90,7 @@ public class InspectionCenter {
 
     public void updateContactPhone(String newPhone) {
         if (newPhone != null && newPhone.isBlank()) {
-            throw new InspectionCenterException("contactPhone은 비어있을 수 없습니다");
+            throw new InspectionCenterException(InspectionCenterErrorCode.INVALID_CONTACT_PHONE);
         }
 
         this.contactPhone = newPhone;
@@ -95,7 +98,7 @@ public class InspectionCenter {
 
     private static String requireNonBlank(String value, String field) {
         if (value == null || value.isBlank()) {
-            throw new InspectionCenterException(field + "은(는) 비어있을 수 없습니다");
+            throw new InspectionCenterException(InspectionCenterErrorCode.INVALID_CENTER_NAME);
         }
         return value;
     }

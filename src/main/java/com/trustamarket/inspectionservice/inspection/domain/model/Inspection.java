@@ -5,6 +5,7 @@ import com.trustamarket.inspectionservice.inspection.domain.enums.Grade;
 import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
 
 import com.trustamarket.inspectionservice.inspection.domain.enums.PhotoType;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionErrorCode;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionResultDetail;
@@ -154,7 +155,7 @@ public class Inspection {
     ) {
         requireStatus(InspectionStatus.IN_PROGRESS, "검수 실패 처리");
         if (inspectorNote == null || inspectorNote.isBlank()) {
-            throw new InspectionException("검수 실패 시 inspectorNote는 필수입니다");
+            throw new InspectionException(InspectionErrorCode.INSPECTOR_NOTE_REQUIRED);
         }
         this.inspectorNote = inspectorNote;
         this.resultDetail = (resultDetail == null) ? InspectionResultDetail.empty() : resultDetail;
@@ -179,7 +180,7 @@ public class Inspection {
         InspectionPhoto target = photos.stream()
                 .filter(p -> p.id().equals(photoId))
                 .findFirst()
-                .orElseThrow(() -> new InspectionException("해당 사진이 없습니다: " + photoId));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.PHOTO_NOT_FOUND, photoId.toString()));
         ensurePhotoTypeAllowed(target.type());
         photos.remove(target);
     }
@@ -192,7 +193,7 @@ public class Inspection {
         Set<PhotoType> allowed = allowedPhotoTypes();
         if (!allowed.contains(photoType)) {
             throw new InspectionException(
-                    "현재 상태(" + status + ")에서는 " + photoType + " 사진을 수정할 수 없습니다"
+                    InspectionErrorCode.PHOTO_TYPE_NOT_ALLOWED, "현재: " + status + ", photoType: " + photoType
             );
         }
     }
@@ -208,7 +209,7 @@ public class Inspection {
     private void requireStatus(InspectionStatus expected, String action) {
         if (this.status != expected) {
             throw new InspectionException(
-                    action + "은(는) " + expected + " 상태에서만 가능합니다 (현재: " + this.status + ")"
+                    InspectionErrorCode.INVALID_STATUS_TRANSITION, action + ": " + expected + " → " + this.status
             );
         }
     }
