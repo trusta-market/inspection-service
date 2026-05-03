@@ -1,18 +1,24 @@
 package com.trustamarket.inspectionservice.inspection.domain.exception;
 
-// TODO: 추후에 common 내의 BaseException 상속 구조로 변경
-public class InspectionException extends RuntimeException {
+import com.trustamarket.common.exception.CustomException;
+
+public class InspectionException extends CustomException {
 
     private final InspectionErrorCode errorCode;
 
     public InspectionException(InspectionErrorCode errorCode) {
-        super(errorCode.getMessage());
+        super(errorCode);
         this.errorCode = errorCode;
     }
 
     public InspectionException(InspectionErrorCode errorCode, String detail) {
-        super(errorCode.getMessage() + ": " + detail);
+        super(errorCode.getStatus(), errorCode.getMessage() + ": " + detail, errorCode.getField());
         this.errorCode = errorCode;
+    }
+
+    @Override
+    public String getType() {
+        return errorCode.getCode();
     }
 
     public InspectionErrorCode getErrorCode() {
