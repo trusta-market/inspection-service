@@ -1,5 +1,6 @@
 package com.trustamarket.inspectionservice.center.adapter.in.web;
 
+import com.trustamarket.common.response.CommonResponse;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.request.RegisterCenterRequest;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.request.UpdateCenterRequest;
 import com.trustamarket.inspectionservice.center.adapter.in.web.dto.response.ChangeCenterStatusResponse;
@@ -34,51 +35,51 @@ public class InspectionCenterApiController {
     private final InspectionCenterUseCase inspectionCenterUseCase;
 
     @GetMapping("/{centerId}")
-    public ResponseEntity<GetCenterResponse> getCenter(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(GetCenterResponse.from(inspectionCenterUseCase.getCenter(centerId)));
+    public ResponseEntity<CommonResponse<GetCenterResponse>> getCenter(@PathVariable UUID centerId) {
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), GetCenterResponse.from(inspectionCenterUseCase.getCenter(centerId))));
     }
 
     @GetMapping
-    public ResponseEntity<GetCentersResponse> getCenters(Pageable pageable) {
+    public ResponseEntity<CommonResponse<GetCentersResponse>> getCenters(Pageable pageable) {
         GetCentersQuery query = new GetCentersQuery(pageable.getPageNumber(), pageable.getPageSize());
-        return ResponseEntity.ok(GetCentersResponse.from(inspectionCenterUseCase.getCenters(query)));
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), GetCentersResponse.from(inspectionCenterUseCase.getCenters(query))));
     }
 
     @PatchMapping("/{centerId}")
-    public ResponseEntity<UpdateCenterResponse> updateCenter(
+    public ResponseEntity<CommonResponse<UpdateCenterResponse>> updateCenter(
             @PathVariable UUID centerId,
             @Valid @RequestBody UpdateCenterRequest request
     ) {
-        return ResponseEntity.ok(UpdateCenterResponse.from(inspectionCenterUseCase.updateCenter(request.toCommand(centerId))));
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), UpdateCenterResponse.from(inspectionCenterUseCase.updateCenter(request.toCommand(centerId)))));
     }
 
     @PostMapping
-    public ResponseEntity<RegisterCenterResponse> register(@Valid @RequestBody RegisterCenterRequest request) {
+    public ResponseEntity<CommonResponse<RegisterCenterResponse>> register(@Valid @RequestBody RegisterCenterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(RegisterCenterResponse.from(inspectionCenterUseCase.register(request.toCommand())));
+                .body(CommonResponse.of(HttpStatus.CREATED.value(), RegisterCenterResponse.from(inspectionCenterUseCase.register(request.toCommand()))));
     }
 
     @PostMapping("/{centerId}/open")
-    public ResponseEntity<ChangeCenterStatusResponse> open(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(ChangeCenterStatusResponse.from(inspectionCenterUseCase.open(centerId)));
+    public ResponseEntity<CommonResponse<ChangeCenterStatusResponse>> open(@PathVariable UUID centerId) {
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), ChangeCenterStatusResponse.from(inspectionCenterUseCase.open(centerId))));
     }
 
     @PostMapping("/{centerId}/maintenance")
-    public ResponseEntity<ChangeCenterStatusResponse> startMaintenance(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(ChangeCenterStatusResponse.from(inspectionCenterUseCase.startMaintenance(centerId)));
+    public ResponseEntity<CommonResponse<ChangeCenterStatusResponse>> startMaintenance(@PathVariable UUID centerId) {
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), ChangeCenterStatusResponse.from(inspectionCenterUseCase.startMaintenance(centerId))));
     }
 
     @PostMapping("/{centerId}/close")
-    public ResponseEntity<ChangeCenterStatusResponse> close(@PathVariable UUID centerId) {
-        return ResponseEntity.ok(ChangeCenterStatusResponse.from(inspectionCenterUseCase.close(centerId)));
+    public ResponseEntity<CommonResponse<ChangeCenterStatusResponse>> close(@PathVariable UUID centerId) {
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), ChangeCenterStatusResponse.from(inspectionCenterUseCase.close(centerId))));
     }
 
     @DeleteMapping("/{centerId}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<CommonResponse<Void>> delete(
             @PathVariable UUID centerId,
             @RequestHeader(value = "X-User-Id", required = false, defaultValue = "system") String userId
     ) {
         inspectionCenterUseCase.delete(centerId, userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), null));
     }
 }

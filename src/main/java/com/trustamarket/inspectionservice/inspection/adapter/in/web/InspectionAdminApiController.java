@@ -1,5 +1,6 @@
 package com.trustamarket.inspectionservice.inspection.adapter.in.web;
 
+import com.trustamarket.common.response.CommonResponse;
 import com.trustamarket.inspectionservice.inspection.adapter.in.web.dto.request.CompleteInspectionRequest;
 import com.trustamarket.inspectionservice.inspection.adapter.in.web.dto.request.FailInspectionRequest;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
@@ -7,6 +8,7 @@ import com.trustamarket.inspectionservice.inspection.application.port.in.Complet
 import com.trustamarket.inspectionservice.inspection.application.port.in.FailInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.StartInspectionUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,31 +29,31 @@ public class InspectionAdminApiController {
     private final FailInspectionUseCase failInspectionUseCase;
 
     @PostMapping("/{inspectionId}/start")
-    public ResponseEntity<Void> start(
+    public ResponseEntity<CommonResponse<Void>> start(
             @RequestHeader("X-User-Id") UUID inspectorId,
             @PathVariable UUID inspectionId
     ) {
         startInspectionUseCase.start(StartInspectionCommand.of(inspectionId, inspectorId));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), null));
     }
 
     @PostMapping("/{inspectionId}/complete")
-    public ResponseEntity<Void> complete(
+    public ResponseEntity<CommonResponse<Void>> complete(
             @RequestHeader("X-User-Id") UUID inspectorId,
             @PathVariable UUID inspectionId,
             @RequestBody CompleteInspectionRequest request
     ) {
         completeInspectionUseCase.complete(request.toCommand(inspectionId));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), null));
     }
 
     @PostMapping("/{inspectionId}/fail")
-    public ResponseEntity<Void> fail(
+    public ResponseEntity<CommonResponse<Void>> fail(
             @RequestHeader("X-User-Id") UUID inspectorId,
             @PathVariable UUID inspectionId,
             @RequestBody FailInspectionRequest request
     ) {
         failInspectionUseCase.fail(request.toCommand(inspectionId));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK.value(), null));
     }
 }
