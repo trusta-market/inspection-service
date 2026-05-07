@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public interface InspectionCenterJpaRepository extends JpaRepository<InspectionC
             """)
     void softDeleteById(
             @Param("centerId") UUID centerId,
-            @Param("deletedAt") LocalDateTime deletedAt,
+            @Param("deletedAt") Instant deletedAt,
             @Param("deletedBy") String deletedBy
     );
 }

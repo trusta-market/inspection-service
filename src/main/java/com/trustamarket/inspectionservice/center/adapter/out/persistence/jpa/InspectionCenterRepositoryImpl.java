@@ -6,7 +6,7 @@ import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +39,6 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
 
     @Override
     public void delete(CenterId id, String deletedBy) {
-        jpaRepository.softDeleteById(id.value(), LocalDateTime.now(), deletedBy);
+        jpaRepository.softDeleteById(id.value(), Instant.now(), deletedBy);
     }
 }
