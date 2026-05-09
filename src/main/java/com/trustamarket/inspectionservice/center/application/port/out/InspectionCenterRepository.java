@@ -1,8 +1,10 @@
 package com.trustamarket.inspectionservice.center.application.port.out;
 
+import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.domain.model.InspectionCenter;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InspectionCenterRepository {
@@ -14,4 +16,8 @@ public interface InspectionCenterRepository {
     boolean existsByNameAndAddress(String name, String addressLine1, String postalCode);
 
     void delete(CenterId id, String deletedBy);
+
+    List<InspectionCenter> findAll(GetCentersQuery query);
+
+    long countAll();
 }

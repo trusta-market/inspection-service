@@ -1,11 +1,14 @@
 package com.trustamarket.inspectionservice.center.adapter.out.persistence.jpa;
 
+import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
 import com.trustamarket.inspectionservice.center.domain.model.InspectionCenter;
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,5 +46,19 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
             entity.softDelete(Instant.now(), deletedBy);
             jpaRepository.save(entity);
         });
+    }
+
+    @Override
+    public List<InspectionCenter> findAll(GetCentersQuery query) {
+        return jpaRepository.findAllByDeletedAtIsNull(PageRequest.of(query.page(), query.size()))
+                .getContent()
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countAll() {
+        return jpaRepository.countByDeletedAtIsNull();
     }
 }

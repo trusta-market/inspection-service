@@ -1,5 +1,7 @@
 package com.trustamarket.inspectionservice.center.adapter.out.persistence.jpa;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +12,10 @@ import java.util.UUID;
 public interface InspectionCenterJpaRepository extends JpaRepository<InspectionCenterJpaEntity, UUID> {
 
     Optional<InspectionCenterJpaEntity> findByCenterIdAndDeletedAtIsNull(UUID centerId);
+
+    Page<InspectionCenterJpaEntity> findAllByDeletedAtIsNull(Pageable pageable);
+
+    long countByDeletedAtIsNull();
 
     @Query("""
             SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END

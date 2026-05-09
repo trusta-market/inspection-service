@@ -1,7 +1,10 @@
 package com.trustamarket.inspectionservice.center.application.service;
 
 import com.trustamarket.inspectionservice.center.application.dto.command.RegisterCenterCommand;
+import com.trustamarket.inspectionservice.center.application.dto.query.GetCentersQuery;
 import com.trustamarket.inspectionservice.center.application.dto.result.ChangeCenterStatusResult;
+import com.trustamarket.inspectionservice.center.application.dto.result.GetCenterPageResult;
+import com.trustamarket.inspectionservice.center.application.dto.result.GetCenterResult;
 import com.trustamarket.inspectionservice.center.application.dto.result.RegisterCenterResult;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
 import com.trustamarket.inspectionservice.center.domain.enums.CenterStatus;
@@ -18,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -343,6 +347,89 @@ class InspectionCenterServiceTest {
             assertThatThrownBy(() -> inspectionCenterService.delete(CENTER_ID, DELETED_BY))
                     .isInstanceOf(InspectionCenterException.class)
                     .hasMessageContaining("CLOSED");
+        }
+    }
+
+    @Nested
+    @DisplayName("센터 단건 조회 (getCenter)")
+    class GetCenter {
+
+        @Test
+        @DisplayName("존재하는 센터 ID로 조회하면 센터 정보를 반환한다")
+        void getCenter_success() {
+            InspectionCenter center = centerInStatus(CenterStatus.OPEN);
+            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
+
+            GetCenterResult result = inspectionCenterService.getCenter(CENTER_ID);
+
+            assertThat(result.centerId()).isEqualTo(CENTER_ID);
+            assertThat(result.name()).isEqualTo("서울 검수 센터");
+            assertThat(result.addressLine1()).isEqualTo("강남대로 123");
+            assertThat(result.city()).isEqualTo("서울");
+            assertThat(result.capacity()).isEqualTo(10);
+            assertThat(result.currentLoad()).isEqualTo(0);
+            assertThat(result.status()).isEqualTo(CenterStatus.OPEN);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 센터 ID면 InspectionCenterException을 던진다")
+        void getCenter_notFound_throwsException() {
+            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionCenterService.getCenter(CENTER_ID))
+                    .isInstanceOf(InspectionCenterException.class)
+                    .hasMessageContaining("존재하지 않는 센터");
+        }
+    }
+
+    @Nested
+    @DisplayName("센터 페이징 조회 (getCenters)")
+    class GetCenters {
+
+        @Test
+        @DisplayName("센터 목록을 페이징 조회하면 content와 페이징 메타를 반환한다")
+        void getCenters_success() {
+            GetCentersQuery query = new GetCentersQuery(0, 10);
+            List<InspectionCenter> centers = List.of(
+                    centerInStatus(CenterStatus.OPEN),
+                    centerInStatus(CenterStatus.MAINTENANCE)
+            );
+            given(inspectionCenterRepository.findAll(query)).willReturn(centers);
+            given(inspectionCenterRepository.countAll()).willReturn(2L);
+
+            GetCenterPageResult result = inspectionCenterService.getCenters(query);
+
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.page()).isEqualTo(0);
+            assertThat(result.size()).isEqualTo(10);
+            assertThat(result.totalElements()).isEqualTo(2L);
+            assertThat(result.totalPages()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("센터가 없으면 빈 content와 totalElements 0을 반환한다")
+        void getCenters_empty() {
+            GetCentersQuery query = new GetCentersQuery(0, 10);
+            given(inspectionCenterRepository.findAll(query)).willReturn(List.of());
+            given(inspectionCenterRepository.countAll()).willReturn(0L);
+
+            GetCenterPageResult result = inspectionCenterService.getCenters(query);
+
+            assertThat(result.content()).isEmpty();
+            assertThat(result.totalElements()).isEqualTo(0L);
+            assertThat(result.totalPages()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("totalElements=25, size=10 이면 totalPages는 3이다")
+        void getCenters_totalPagesCalculation() {
+            GetCentersQuery query = new GetCentersQuery(0, 10);
+            given(inspectionCenterRepository.findAll(query)).willReturn(List.of());
+            given(inspectionCenterRepository.countAll()).willReturn(25L);
+
+            GetCenterPageResult result = inspectionCenterService.getCenters(query);
+
+            assertThat(result.totalPages()).isEqualTo(3);
         }
     }
 }
