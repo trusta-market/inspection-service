@@ -67,8 +67,10 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    @Column
     private Instant deletedAt;
 
+    @Column
     private String deletedBy;
 
     @Transient
