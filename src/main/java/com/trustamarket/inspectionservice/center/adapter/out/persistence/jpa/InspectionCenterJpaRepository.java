@@ -13,8 +13,8 @@ public interface InspectionCenterJpaRepository extends JpaRepository<InspectionC
 
     @Query("""
             SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
-                FROM InspectionCenterJpaEntity c
-                WHERE c.name = :name AND c.addressLine1 = :addressLine1 AND c.postalCode = :postalCode AND c.deletedAt IS NULL
+            FROM InspectionCenterJpaEntity c
+            WHERE c.name = :name AND c.addressLine1 = :addressLine1 AND c.postalCode = :postalCode AND c.deletedAt IS NULL
             """)
     boolean existsByNameAndAddressLine1AndPostalCode(
             @Param("name") String name,

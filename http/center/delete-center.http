@@ -1,0 +1,14 @@
+### 센터 삭제 - 정상 (X-User-Id 포함)
+DELETE {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+X-User-Id: admin-user
+
+### 센터 삭제 - 정상 (X-User-Id 생략, system 기본값 적용)
+DELETE {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000001
+
+### 센터 삭제 - Not Found
+DELETE {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000999
+X-User-Id: admin-user
+
+### 센터 삭제 - CLOSED 아닌 상태 (OPEN/MAINTENANCE 센터 삭제 시도)
+DELETE {{baseUrl}}/api/v1/centers/00000000-0000-0000-0000-000000000002
+X-User-Id: admin-user

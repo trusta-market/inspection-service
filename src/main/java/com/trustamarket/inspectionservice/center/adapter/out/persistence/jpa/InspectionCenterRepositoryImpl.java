@@ -6,6 +6,7 @@ import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,5 +35,13 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
     @Override
     public boolean existsByNameAndAddress(String name, String addressLine1, String postalCode) {
         return jpaRepository.existsByNameAndAddressLine1AndPostalCode(name, addressLine1, postalCode);
+    }
+
+    @Override
+    public void delete(CenterId id, String deletedBy) {
+        jpaRepository.findById(id.value()).ifPresent(entity -> {
+            entity.softDelete(Instant.now(), deletedBy);
+            jpaRepository.save(entity);
+        });
     }
 }

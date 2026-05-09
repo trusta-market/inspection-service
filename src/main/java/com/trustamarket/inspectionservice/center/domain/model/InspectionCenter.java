@@ -106,6 +106,12 @@ public class InspectionCenter {
         this.status = target;
     }
 
+    public void validateDeletable() {
+        if (this.status != CenterStatus.CLOSED) {
+            throw new InspectionCenterException("센터 삭제는 CLOSED 상태에서만 가능합니다 (현재: " + this.status + ")");
+        }
+    }
+
     public void rename(String newName) {
         this.name = requireNonBlank(newName, "name");
     }

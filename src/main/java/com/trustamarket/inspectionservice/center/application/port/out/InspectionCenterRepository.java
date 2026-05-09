@@ -12,4 +12,6 @@ public interface InspectionCenterRepository {
     Optional<InspectionCenter> findById(CenterId id);
 
     boolean existsByNameAndAddress(String name, String addressLine1, String postalCode);
+
+    void delete(CenterId id, String deletedBy);
 }
