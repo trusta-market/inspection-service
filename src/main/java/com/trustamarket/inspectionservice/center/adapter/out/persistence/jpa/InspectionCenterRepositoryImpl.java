@@ -39,6 +39,9 @@ public class InspectionCenterRepositoryImpl implements InspectionCenterRepositor
 
     @Override
     public void delete(CenterId id, String deletedBy) {
-        jpaRepository.softDeleteById(id.value(), Instant.now(), deletedBy);
+        jpaRepository.findById(id.value()).ifPresent(entity -> {
+            entity.softDelete(Instant.now(), deletedBy);
+            jpaRepository.save(entity);
+        });
     }
 }

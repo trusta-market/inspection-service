@@ -92,6 +92,11 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
         this.isNew = false;
     }
 
+    public void softDelete(Instant deletedAt, String deletedBy) {
+        this.deletedAt = deletedAt;
+        this.deletedBy = deletedBy;
+    }
+
     public void update(
             String name,
             String addressLine1,

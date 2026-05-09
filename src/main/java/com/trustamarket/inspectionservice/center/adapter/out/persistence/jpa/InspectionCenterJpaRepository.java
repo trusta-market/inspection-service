@@ -1,11 +1,9 @@
 package com.trustamarket.inspectionservice.center.adapter.out.persistence.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,17 +20,5 @@ public interface InspectionCenterJpaRepository extends JpaRepository<InspectionC
             @Param("name") String name,
             @Param("addressLine1") String addressLine1,
             @Param("postalCode") String postalCode
-    );
-
-    @Modifying
-    @Query("""
-            UPDATE InspectionCenterJpaEntity c
-            SET c.deletedAt = :deletedAt, c.deletedBy = :deletedBy, c.updatedAt = :deletedAt
-            WHERE c.centerId = :centerId AND c.deletedAt IS NULL
-            """)
-    void softDeleteById(
-            @Param("centerId") UUID centerId,
-            @Param("deletedAt") Instant deletedAt,
-            @Param("deletedBy") String deletedBy
     );
 }
