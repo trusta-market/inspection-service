@@ -27,7 +27,7 @@ public interface InspectionCenterJpaRepository extends JpaRepository<InspectionC
     @Modifying
     @Query("""
             UPDATE InspectionCenterJpaEntity c
-            SET c.deletedAt = :deletedAt, c.deletedBy = :deletedBy
+            SET c.deletedAt = :deletedAt, c.deletedBy = :deletedBy, c.updatedAt = :deletedAt
             WHERE c.centerId = :centerId AND c.deletedAt IS NULL
             """)
     void softDeleteById(
