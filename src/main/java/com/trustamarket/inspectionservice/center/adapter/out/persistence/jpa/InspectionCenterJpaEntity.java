@@ -19,7 +19,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -61,14 +61,16 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
-    private LocalDateTime deletedAt;
+    @Column
+    private Instant deletedAt;
 
+    @Column
     private String deletedBy;
 
     @Transient
@@ -88,6 +90,11 @@ public class InspectionCenterJpaEntity implements Persistable<UUID> {
     @PostPersist
     void markNotNew() {
         this.isNew = false;
+    }
+
+    public void softDelete(Instant deletedAt, String deletedBy) {
+        this.deletedAt = deletedAt;
+        this.deletedBy = deletedBy;
     }
 
     public void update(

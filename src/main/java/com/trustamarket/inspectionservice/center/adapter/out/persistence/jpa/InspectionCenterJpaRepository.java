@@ -10,8 +10,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,17 +46,5 @@ public interface InspectionCenterJpaRepository extends JpaRepository<InspectionC
             @Param("name") String name,
             @Param("addressLine1") String addressLine1,
             @Param("postalCode") String postalCode
-    );
-
-    @Modifying
-    @Query("""
-            UPDATE InspectionCenterJpaEntity c
-            SET c.deletedAt = :deletedAt, c.deletedBy = :deletedBy
-            WHERE c.centerId = :centerId AND c.deletedAt IS NULL
-            """)
-    void softDeleteById(
-            @Param("centerId") UUID centerId,
-            @Param("deletedAt") LocalDateTime deletedAt,
-            @Param("deletedBy") String deletedBy
     );
 }
