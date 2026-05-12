@@ -4,6 +4,10 @@ import java.util.UUID;
 
 public record InspectionCompletedKafkaEvent(
         UUID inspectionId,
-        UUID productId
+        UUID productId,
+        String grade,
+        long suggestedPriceAmount,
+        String currency,
+        UUID inspectorId
 ) {
 }

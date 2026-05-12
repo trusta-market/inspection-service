@@ -24,7 +24,7 @@ public class KafkaInspectionFailedProducer {
     public void on(InspectionFailedEvent event) {
         try {
             String payload = objectMapper.writeValueAsString(
-                    new InspectionFailedKafkaEvent(event.inspectionId(), event.productId(), event.sellerId())
+                    new InspectionFailedKafkaEvent(event.inspectionId(), event.productId(), event.sellerId(), event.centerId())
             );
             kafkaTemplate.send(TOPIC, event.inspectionId().toString(), payload);
             log.info("inspection.failed 발행: inspectionId={}, sellerId={}", event.inspectionId(), event.sellerId());
