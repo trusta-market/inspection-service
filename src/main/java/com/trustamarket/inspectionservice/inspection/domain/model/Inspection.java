@@ -163,8 +163,22 @@ public class Inspection {
         this.status = InspectionStatus.FAILED;
     }
 
+    public void acceptPrice(Instant at) {
+        requireStatus(InspectionStatus.PRICED, "가격 수락");
+        this.status = InspectionStatus.PRICE_ACCEPTED;
+    }
+
+    public void rejectPrice(Instant at) {
+        requireStatus(InspectionStatus.PRICED, "가격 거절");
+        this.status = InspectionStatus.PRICE_REJECTED;
+    }
+
     public void completeReturn(Instant at) {
-        requireStatus(InspectionStatus.FAILED, "반송 완료");
+        if (this.status != InspectionStatus.FAILED && this.status != InspectionStatus.PRICE_REJECTED) {
+            throw new InspectionException(
+                    InspectionErrorCode.INVALID_STATUS_TRANSITION, "반송 완료: 현재 상태=" + this.status
+            );
+        }
         this.returnCompletedAt = Objects.requireNonNull(at);
         this.status = InspectionStatus.RETURN_COMPLETED;
     }

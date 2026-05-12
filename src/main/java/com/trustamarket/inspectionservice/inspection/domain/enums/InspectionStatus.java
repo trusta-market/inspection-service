@@ -5,10 +5,12 @@ public enum InspectionStatus {
     ARRIVED,
     IN_PROGRESS,
     PRICED,
+    PRICE_ACCEPTED,
+    PRICE_REJECTED,
     FAILED,
     RETURN_COMPLETED;
 
     public boolean isTerminal() {
-        return this == PRICED || this == RETURN_COMPLETED;
+        return this == PRICE_ACCEPTED || this == RETURN_COMPLETED;
     }
 }
