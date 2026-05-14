@@ -36,6 +36,7 @@ public class InspectionMapper {
                 inspection.getInspectionDoneAt(),
                 inspection.getPricedAt(),
                 inspection.getSellerDecidedAt(),
+                inspection.getReturnCompletedAt(),
                 inspection.getGrade(),
                 inspection.getSuggestedPrice() != null ? inspection.getSuggestedPrice().amount() : null,
                 inspection.getSuggestedPrice() != null ? inspection.getSuggestedPrice().currency() : null,
@@ -68,6 +69,7 @@ public class InspectionMapper {
                 entity.getInspectionDoneAt(),
                 entity.getPricedAt(),
                 entity.getSellerDecidedAt(),
+                entity.getReturnCompletedAt(),
                 entity.getGrade(),
                 entity.getSuggestedPriceAmount() != null
                         ? Money.of(entity.getSuggestedPriceAmount(), entity.getSuggestedPriceCurrency()) : null,

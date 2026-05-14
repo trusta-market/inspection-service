@@ -1,6 +1,8 @@
 package com.trustamarket.inspectionservice.inspection.adapter.in.web;
 
+import com.trustamarket.inspectionservice.inspection.adapter.in.web.dto.request.CompleteInspectionRequest;
 import com.trustamarket.inspectionservice.inspection.adapter.in.web.dto.request.StartInspectionRequest;
+import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.StartInspectionUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class InspectionAdminApiController {
 
     private final StartInspectionUseCase startInspectionUseCase;
+    private final CompleteInspectionUseCase completeInspectionUseCase;
 
     @PostMapping("/{inspectionId}/start")
     public ResponseEntity<Void> start(
@@ -25,6 +28,15 @@ public class InspectionAdminApiController {
             @RequestBody StartInspectionRequest request
     ) {
         startInspectionUseCase.start(request.toCommand(inspectionId));
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{inspectionId}/complete")
+    public ResponseEntity<Void> complete(
+            @PathVariable UUID inspectionId,
+            @RequestBody CompleteInspectionRequest request
+    ) {
+        completeInspectionUseCase.complete(request.toCommand(inspectionId));
         return ResponseEntity.ok().build();
     }
 }

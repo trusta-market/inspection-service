@@ -13,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class KafkaInspectionStartedPublisher {
+public class KafkaInspectionStartedProducer {
 
     private static final String TOPIC = "inspection.started";
 

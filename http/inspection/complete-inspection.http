@@ -1,0 +1,35 @@
+### 검수 완료 - 정상 (optional 포함)
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/complete
+Content-Type: application/json
+
+{
+  "grade": "A",
+  "suggestedPriceAmount": 1200000,
+  "currency": "KRW",
+  "inspectorNote": "전반적으로 상태 양호. 미세한 스크래치 있으나 등급 영향 없음.",
+  "resultDetail": {
+    "stitchCondition": "양호",
+    "hardwareCondition": "양호",
+    "serialVerified": true
+  }
+}
+
+### 검수 완료 - 정상 (optional 생략)
+POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/complete
+Content-Type: application/json
+
+{
+  "grade": "B",
+  "suggestedPriceAmount": 950000,
+  "currency": "KRW"
+}
+
+### 검수 완료 - 존재하지 않는 inspectionId
+POST {{baseUrl}}/api/v1/admin/inspections/99999999-9999-9999-9999-999999999999/complete
+Content-Type: application/json
+
+{
+  "grade": "A",
+  "suggestedPriceAmount": 1200000,
+  "currency": "KRW"
+}

@@ -1,20 +1,25 @@
 package com.trustamarket.inspectionservice.inspection.application.service;
 
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.query.GetMyInspectionsQuery;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionPageResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
+import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
 import com.trustamarket.inspectionservice.inspection.domain.enums.CurrencyCode;
+import com.trustamarket.inspectionservice.inspection.domain.enums.Grade;
 import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
+import com.trustamarket.inspectionservice.inspection.domain.vo.InspectorId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.Money;
 import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.SellerId;
@@ -75,6 +80,12 @@ class InspectionServiceTest {
     private Inspection arrivedInspection() {
         Inspection inspection = requestedInspection();
         inspection.markArrived(Instant.now());
+        return inspection;
+    }
+
+    private Inspection inProgressInspection() {
+        Inspection inspection = arrivedInspection();
+        inspection.start(InspectorId.of(INSPECTOR_ID), Instant.now());
         return inspection;
     }
 
@@ -188,6 +199,75 @@ class InspectionServiceTest {
             given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
 
             assertThatThrownBy(() -> inspectionService.start(new StartInspectionCommand(inspection.getId().value(), INSPECTOR_ID)))
+                    .isInstanceOf(InspectionException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("검수 완료 (complete)")
+    class Complete {
+
+        private CompleteInspectionCommand validCommand(UUID inspectionId) {
+            return new CompleteInspectionCommand(inspectionId, "A", 1_200_000L, "KRW", "상태 양호", null);
+        }
+
+        @Test
+        @DisplayName("IN_PROGRESS 상태의 검수를 PRICED로 전이하고 이벤트 2개를 발행한다")
+        void complete_success() {
+            Inspection inspection = inProgressInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.complete(validCommand(inspection.getId().value()));
+
+            ArgumentCaptor<Inspection> captor = ArgumentCaptor.forClass(Inspection.class);
+            then(inspectionRepository).should().save(captor.capture());
+            Inspection saved = captor.getValue();
+            assertThat(saved.getStatus()).isEqualTo(InspectionStatus.PRICED);
+            assertThat(saved.getGrade()).isEqualTo(Grade.A);
+            assertThat(saved.getSuggestedPrice().amount().longValue()).isEqualTo(1_200_000L);
+            assertThat(saved.getInspectorNote()).isEqualTo("상태 양호");
+            assertThat(saved.getPricedAt()).isNotNull();
+
+            then(inspectionEventPublisher).should().publish(any(InspectionCompletedEvent.class));
+            then(inspectionEventPublisher).should().publish(any(PricingCompletedEvent.class));
+        }
+
+        @Test
+        @DisplayName("PricingCompletedEvent에 grade와 suggestedPrice 정보가 포함된다")
+        void complete_pricingEvent_containsPriceInfo() {
+            Inspection inspection = inProgressInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+            given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
+
+            inspectionService.complete(validCommand(inspection.getId().value()));
+
+            ArgumentCaptor<PricingCompletedEvent> captor = ArgumentCaptor.forClass(PricingCompletedEvent.class);
+            then(inspectionEventPublisher).should().publish(captor.capture());
+            PricingCompletedEvent event = captor.getValue();
+            assertThat(event.grade()).isEqualTo("A");
+            assertThat(event.suggestedPriceAmount()).isEqualTo(1_200_000L);
+            assertThat(event.currency()).isEqualTo("KRW");
+        }
+
+        @Test
+        @DisplayName("inspectionId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
+        void complete_notFound_throwsException() {
+            UUID unknownId = UUID.randomUUID();
+            given(inspectionRepository.findById(InspectionId.of(unknownId))).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> inspectionService.complete(validCommand(unknownId)))
+                    .isInstanceOf(InspectionException.class)
+                    .hasMessageContaining(unknownId.toString());
+        }
+
+        @Test
+        @DisplayName("IN_PROGRESS 상태가 아니면 InspectionException을 던진다")
+        void complete_wrongStatus_throwsException() {
+            Inspection inspection = arrivedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            assertThatThrownBy(() -> inspectionService.complete(validCommand(inspection.getId().value())))
                     .isInstanceOf(InspectionException.class);
         }
     }
