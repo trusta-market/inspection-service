@@ -6,6 +6,5 @@ public record ProductInspectionRequestedEvent(
         UUID productId,
         UUID sellerId,
         long originalPrice,
-        String currency,
-        String inspectionType
+        String currency
 ) {}

@@ -1,7 +1,7 @@
-package com.trustamarket.inspectionservice.center.adapter.in.messaging;
+package com.trustamarket.inspectionservice.inspection.adapter.in.messaging;
 
-import com.trustamarket.inspectionservice.center.application.dto.command.AssignCenterCommand;
-import com.trustamarket.inspectionservice.center.application.port.in.AssignCenterForInspectionUseCase;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
+import com.trustamarket.inspectionservice.inspection.application.port.in.RequestInspectionUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.timeout;
         "spring.jpa.properties.hibernate.default_schema="
 })
 @DirtiesContext
-class ProductInspectionRequestedConsumerTest {
+class CenterSlotAssignedConsumerTest {
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -50,7 +50,7 @@ class ProductInspectionRequestedConsumerTest {
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @MockitoBean
-    private AssignCenterForInspectionUseCase assignCenterForInspectionUseCase;
+    private RequestInspectionUseCase requestInspectionUseCase;
 
     @BeforeEach
     void waitForConsumerAssignment() throws Exception {
@@ -63,16 +63,17 @@ class ProductInspectionRequestedConsumerTest {
             {
               "productId": "a1b2c3d4-0000-0000-0000-000000000001",
               "sellerId": "b2c3d4e5-0000-0000-0000-000000000002",
-              "originalPrice": 1500000,
+              "centerId": "c3d4e5f6-0000-0000-0000-000000000003",
+              "originalPriceAmount": 1500000,
               "currency": "KRW"
             }
             """;
 
     @Test
-    @DisplayName("유효한 페이로드를 수신하면 assign()을 호출한다")
-    void consume_validPayload_callsAssign() throws Exception {
-        kafkaTemplate.send("product.inspection-requested", VALID_PAYLOAD).get();
+    @DisplayName("유효한 페이로드를 수신하면 request()를 호출한다")
+    void consume_validPayload_callsRequest() throws Exception {
+        kafkaTemplate.send("center.slot-assigned", VALID_PAYLOAD).get();
 
-        then(assignCenterForInspectionUseCase).should(timeout(5000)).assign(any(AssignCenterCommand.class));
+        then(requestInspectionUseCase).should(timeout(5000)).request(any(RequestInspectionCommand.class));
     }
 }
