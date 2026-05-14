@@ -2,6 +2,7 @@ package com.trustamarket.inspectionservice.support;
 
 import com.trustamarket.inspectionservice.inspection.application.port.in.MarkArrivedUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.RequestInspectionUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.in.StartInspectionUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +49,9 @@ public abstract class KafkaConsumerIntegrationTest {
 
     @MockitoBean
     protected MarkArrivedUseCase markArrivedUseCase;
+
+    @MockitoBean
+    protected StartInspectionUseCase startInspectionUseCase;
 
     @BeforeEach
     void waitForConsumerAssignment() throws Exception {
