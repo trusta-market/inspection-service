@@ -6,5 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface InspectionJpaRepository extends JpaRepository<InspectionJpaEntity, UUID> {
+
     Optional<InspectionJpaEntity> findByInspectionIdAndDeletedAtIsNull(UUID inspectionId);
+
+    Optional<InspectionJpaEntity> findByProductIdAndDeletedAtIsNull(UUID productId);
 }
