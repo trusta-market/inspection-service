@@ -1,6 +1,7 @@
 ### 검수 완료 - 정상 (optional 포함)
 POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/complete
 Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
 
 {
   "grade": "A",
@@ -17,6 +18,7 @@ Content-Type: application/json
 ### 검수 완료 - 정상 (optional 생략)
 POST {{baseUrl}}/api/v1/admin/inspections/00000000-0000-0000-0000-000000000001/complete
 Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
 
 {
   "grade": "B",
@@ -27,6 +29,7 @@ Content-Type: application/json
 ### 검수 완료 - 존재하지 않는 inspectionId
 POST {{baseUrl}}/api/v1/admin/inspections/99999999-9999-9999-9999-999999999999/complete
 Content-Type: application/json
+X-User-Id: 00000000-0000-0000-0000-000000000099
 
 {
   "grade": "A",

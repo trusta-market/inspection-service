@@ -1,6 +1,7 @@
 package com.trustamarket.inspectionservice.inspection.adapter.out.messaging;
 
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
+import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
@@ -26,6 +27,11 @@ public class InspectionEventPublisherAdapter implements InspectionEventPublisher
 
     @Override
     public void publish(PricingCompletedEvent event) {
+        eventPublisher.publishEvent(event);
+    }
+
+    @Override
+    public void publish(InspectionFailedEvent event) {
         eventPublisher.publishEvent(event);
     }
 }

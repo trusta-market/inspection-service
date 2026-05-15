@@ -40,14 +40,11 @@ public class Inspection {
     private Instant startedAt;
     private Instant inspectionDoneAt;
     private Instant pricedAt;
-    private Instant sellerDecidedAt;
     private Instant returnCompletedAt;
 
     private Grade grade;
     private Money suggestedPrice;
-    private Money finalPrice;
     private String inspectorNote;
-    private String rejectReason;
     private InspectionResultDetail resultDetail;
 
     private final List<InspectionPhoto> photos = new ArrayList<>();
@@ -83,13 +80,10 @@ public class Inspection {
             Instant startedAt,
             Instant inspectionDoneAt,
             Instant pricedAt,
-            Instant sellerDecidedAt,
             Instant returnCompletedAt,
             Grade grade,
             Money suggestedPrice,
-            Money finalPrice,
             String inspectorNote,
-            String rejectReason,
             InspectionResultDetail resultDetail,
             List<InspectionPhoto> photos
     ) {
@@ -99,13 +93,10 @@ public class Inspection {
         this.startedAt = startedAt;
         this.inspectionDoneAt = inspectionDoneAt;
         this.pricedAt = pricedAt;
-        this.sellerDecidedAt = sellerDecidedAt;
         this.returnCompletedAt = returnCompletedAt;
         this.grade = grade;
         this.suggestedPrice = suggestedPrice;
-        this.finalPrice = finalPrice;
         this.inspectorNote = inspectorNote;
-        this.rejectReason = rejectReason;
         this.resultDetail = resultDetail;
         if (photos != null) {
             this.photos.addAll(photos);
@@ -169,23 +160,6 @@ public class Inspection {
         this.resultDetail = (resultDetail == null) ? InspectionResultDetail.empty() : resultDetail;
         this.inspectionDoneAt = Objects.requireNonNull(at);
         this.status = InspectionStatus.FAILED;
-    }
-
-    public void acceptPrice(Instant at) {
-        requireStatus(InspectionStatus.PRICED, "가격 수락");
-        this.finalPrice = this.suggestedPrice;
-        this.sellerDecidedAt = Objects.requireNonNull(at);
-        this.status = InspectionStatus.ACCEPTED;
-    }
-
-    public void rejectPrice(String reason, Instant at) {
-        requireStatus(InspectionStatus.PRICED, "가격 거절");
-        if (reason == null || reason.isBlank()) {
-            throw new InspectionException("거절 사유는 필수입니다");
-        }
-        this.rejectReason = reason;
-        this.sellerDecidedAt = Objects.requireNonNull(at);
-        this.status = InspectionStatus.REJECTED;
     }
 
     public void completeReturn(Instant at) {
@@ -252,20 +226,17 @@ public class Inspection {
             Instant startedAt,
             Instant inspectionDoneAt,
             Instant pricedAt,
-            Instant sellerDecidedAt,
             Instant returnCompletedAt,
             Grade grade,
             Money suggestedPrice,
-            Money finalPrice,
             String inspectorNote,
-            String rejectReason,
             InspectionResultDetail resultDetail,
             List<InspectionPhoto> photos
     ) {
         return new Inspection(
                 id, productId, sellerId, centerId, originalPrice, requestedAt, status,
-                inspectorId, arrivedAt, startedAt, inspectionDoneAt, pricedAt, sellerDecidedAt,
-                returnCompletedAt, grade, suggestedPrice, finalPrice, inspectorNote, rejectReason,
+                inspectorId, arrivedAt, startedAt, inspectionDoneAt, pricedAt,
+                returnCompletedAt, grade, suggestedPrice, inspectorNote,
                 resultDetail, photos
         );
     }
