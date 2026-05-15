@@ -3,7 +3,6 @@ package com.trustamarket.inspectionservice.inspection.adapter.out.messaging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
-import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -17,7 +16,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class KafkaInspectionCompletedProducer {
 
     private static final String INSPECTION_COMPLETED_TOPIC = "inspection.completed";
-    private static final String PRICING_COMPLETED_TOPIC = "pricing.completed";
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -25,14 +23,11 @@ public class KafkaInspectionCompletedProducer {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(InspectionCompletedEvent event) {
         publish(INSPECTION_COMPLETED_TOPIC, event.inspectionId().toString(),
-                new InspectionCompletedKafkaEvent(event.inspectionId(), event.productId()));
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void on(PricingCompletedEvent event) {
-        publish(PRICING_COMPLETED_TOPIC, event.inspectionId().toString(),
-                new PricingCompletedKafkaEvent(event.inspectionId(), event.productId(),
-                        event.grade(), event.suggestedPriceAmount(), event.currency()));
+                new InspectionCompletedKafkaEvent(
+                        event.inspectionId(), event.productId(),
+                        event.grade(), event.suggestedPriceAmount(),
+                        event.currency(), event.inspectorId()
+                ));
     }
 
     private void publish(String topic, String key, Object payload) {

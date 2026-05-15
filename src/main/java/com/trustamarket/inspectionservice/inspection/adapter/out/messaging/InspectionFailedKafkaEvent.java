@@ -5,6 +5,7 @@ import java.util.UUID;
 public record InspectionFailedKafkaEvent(
         UUID inspectionId,
         UUID productId,
-        UUID sellerId
+        UUID sellerId,
+        UUID centerId
 ) {
 }

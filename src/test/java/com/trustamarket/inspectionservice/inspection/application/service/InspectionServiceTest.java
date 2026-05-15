@@ -14,7 +14,6 @@ import com.trustamarket.inspectionservice.inspection.application.dto.result.GetI
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
-import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
 import com.trustamarket.inspectionservice.inspection.domain.enums.CurrencyCode;
@@ -222,7 +221,7 @@ class InspectionServiceTest {
         }
 
         @Test
-        @DisplayName("IN_PROGRESS 상태의 검수를 PRICED로 전이하고 이벤트 2개를 발행한다")
+        @DisplayName("IN_PROGRESS 상태의 검수를 PRICED로 전이하고 이벤트 1개를 발행한다")
         void complete_success() {
             Inspection inspection = inProgressInspection();
             given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
@@ -240,24 +239,24 @@ class InspectionServiceTest {
             assertThat(saved.getPricedAt()).isNotNull();
 
             then(inspectionEventPublisher).should().publish(any(InspectionCompletedEvent.class));
-            then(inspectionEventPublisher).should().publish(any(PricingCompletedEvent.class));
         }
 
         @Test
-        @DisplayName("PricingCompletedEvent에 grade와 suggestedPrice 정보가 포함된다")
-        void complete_pricingEvent_containsPriceInfo() {
+        @DisplayName("InspectionCompletedEvent에 grade, suggestedPriceAmount, currency, inspectorId가 포함된다")
+        void complete_event_containsPriceInfo() {
             Inspection inspection = inProgressInspection();
             given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
             given(inspectionRepository.save(any(Inspection.class))).willAnswer(inv -> inv.getArgument(0));
 
             inspectionService.complete(validCommand(inspection.getId().value()));
 
-            ArgumentCaptor<PricingCompletedEvent> captor = ArgumentCaptor.forClass(PricingCompletedEvent.class);
+            ArgumentCaptor<InspectionCompletedEvent> captor = ArgumentCaptor.forClass(InspectionCompletedEvent.class);
             then(inspectionEventPublisher).should().publish(captor.capture());
-            PricingCompletedEvent event = captor.getValue();
+            InspectionCompletedEvent event = captor.getValue();
             assertThat(event.grade()).isEqualTo("A");
             assertThat(event.suggestedPriceAmount()).isEqualTo(1_200_000L);
             assertThat(event.currency()).isEqualTo("KRW");
+            assertThat(event.inspectorId()).isEqualTo(INSPECTOR_ID);
         }
 
         @Test

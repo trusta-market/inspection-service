@@ -11,18 +11,21 @@ import com.trustamarket.inspectionservice.inspection.application.dto.query.GetMy
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionPageResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.AcceptPriceCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.RejectPriceCommand;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionReturnCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
-import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetCenterIdByProductIdResult;
+import com.trustamarket.inspectionservice.inspection.application.port.in.AcceptPriceUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteReturnUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.FailInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.GetCenterIdByProductIdUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.GetInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.MarkArrivedUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.in.RejectPriceUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.RequestInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.StartInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
@@ -50,7 +53,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InspectionService implements RequestInspectionUseCase, MarkArrivedUseCase, StartInspectionUseCase,
         CompleteInspectionUseCase, FailInspectionUseCase, CompleteReturnUseCase, GetInspectionUseCase,
-        GetCenterIdByProductIdUseCase {
+        GetCenterIdByProductIdUseCase, AcceptPriceUseCase, RejectPriceUseCase {
 
     private final InspectionRepository inspectionRepository;
     private final InspectionEventPublisher inspectionEventPublisher;
@@ -93,14 +96,11 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
         inspectionRepository.save(inspection);
         inspectionEventPublisher.publish(new InspectionCompletedEvent(
                 inspection.getId().value(),
-                inspection.getProductId().value()
-        ));
-        inspectionEventPublisher.publish(new PricingCompletedEvent(
-                inspection.getId().value(),
                 inspection.getProductId().value(),
                 inspection.getGrade().name(),
                 inspection.getSuggestedPrice().amount().longValue(),
-                inspection.getSuggestedPrice().currency().name()
+                inspection.getSuggestedPrice().currency().name(),
+                inspection.getInspectorId().value()
         ));
     }
 
@@ -118,7 +118,32 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
         inspectionEventPublisher.publish(new InspectionFailedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value(),
-                inspection.getSellerId().value()
+                inspection.getSellerId().value(),
+                inspection.getCenterId().value()
+        ));
+    }
+
+    @Override
+    @Transactional
+    public void accept(AcceptPriceCommand command) {
+        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
+        inspection.acceptPrice(Instant.now());
+        inspectionRepository.save(inspection);
+    }
+
+    @Override
+    @Transactional
+    public void reject(RejectPriceCommand command) {
+        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
+        inspection.rejectPrice(Instant.now());
+        inspectionRepository.save(inspection);
+        inspectionEventPublisher.publish(new InspectionFailedEvent(
+                inspection.getId().value(),
+                inspection.getProductId().value(),
+                inspection.getSellerId().value(),
+                inspection.getCenterId().value()
         ));
     }
 
