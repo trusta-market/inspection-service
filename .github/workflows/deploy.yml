@@ -30,7 +30,11 @@ jobs:
         run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
       - name: Build Docker image
-        run: docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+        run: |
+          docker build \
+            --build-arg GPR_USER=${{ secrets.GPR_USER }} \
+            --build-arg GPR_TOKEN=${{ secrets.GPR_TOKEN }} \
+            -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
 
       - name: Push image
         run: docker push --all-tags $IMAGE
