@@ -3,13 +3,17 @@
 FROM gradle:8.10-jdk21-alpine AS builder
 WORKDIR /workspace
 
+# GitHub Packages 인증 (com.trustamarket:common dependency 받기 위함)
+ARG GPR_USER
+ARG GPR_TOKEN
+
 COPY settings.gradle build.gradle ./
 COPY gradle ./gradle
-RUN gradle dependencies --no-daemon
+RUN GPR_USER="$GPR_USER" GPR_TOKEN="$GPR_TOKEN" gradle dependencies --no-daemon
 
 COPY src ./src
 
-RUN gradle bootJar --no-daemon \
+RUN GPR_USER="$GPR_USER" GPR_TOKEN="$GPR_TOKEN" gradle bootJar --no-daemon \
  && cp build/libs/*.jar /workspace/app.jar
 
 FROM eclipse-temurin:21-jre-alpine
