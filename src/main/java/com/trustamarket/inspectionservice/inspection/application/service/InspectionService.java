@@ -27,6 +27,7 @@ import com.trustamarket.inspectionservice.inspection.application.port.out.Inspec
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
 import com.trustamarket.inspectionservice.inspection.domain.enums.CurrencyCode;
 import com.trustamarket.inspectionservice.inspection.domain.enums.Grade;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionErrorCode;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
@@ -69,7 +70,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional
     public void markArrived(MarkArrivedCommand command) {
         Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
-                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: productId=" + command.productId()));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
         inspection.markArrived(Instant.now());
         inspectionRepository.save(inspection);
     }
@@ -78,7 +79,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional
     public void complete(CompleteInspectionCommand command) {
         Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
-                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: inspectionId=" + command.inspectionId()));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
         inspection.completeInspection(
                 Grade.valueOf(command.grade()),
                 Money.of(command.suggestedPriceAmount(), CurrencyCode.valueOf(command.currency())),
@@ -104,7 +105,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional
     public void fail(FailInspectionCommand command) {
         Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
-                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: inspectionId=" + command.inspectionId()));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
         inspection.failInspection(
                 command.inspectorNote(),
                 command.resultDetail() != null ? new InspectionResultDetail(command.resultDetail()) : InspectionResultDetail.empty(),
@@ -122,7 +123,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional
     public void start(StartInspectionCommand command) {
         Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
-                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: inspectionId=" + command.inspectionId()));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
         inspection.start(InspectorId.of(command.inspectorId()), Instant.now());
         inspectionRepository.save(inspection);
         inspectionEventPublisher.publish(new InspectionStartedEvent(
@@ -135,7 +136,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional
     public void completeReturn(CompleteReturnCommand command) {
         Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
-                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: productId=" + command.productId()));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
         inspection.completeReturn(Instant.now());
         inspectionRepository.save(inspection);
         inspectionEventPublisher.publish(new InspectionReturnCompletedEvent(
@@ -164,7 +165,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional(readOnly = true)
     public GetInspectionResult getInspection(UUID inspectionId) {
         Inspection inspection = inspectionRepository.findById(InspectionId.of(inspectionId))
-                .orElseThrow(() -> new InspectionException("검수 요청을 찾을 수 없습니다: inspectionId=" + inspectionId));
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + inspectionId));
         return GetInspectionResult.from(inspection);
     }
 }

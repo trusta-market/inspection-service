@@ -13,10 +13,9 @@ public record UpdateCenterRequest(
         String addressLine2,
         @NotBlank String city,
         @NotBlank String postalCode,
-        String contactPhone,
-        @NotNull @Min(1) Integer capacity
+        String contactPhone
 ) {
     public UpdateCenterCommand toCommand(UUID centerId) {
-        return new UpdateCenterCommand(centerId, name, addressLine1, addressLine2, city, postalCode, contactPhone, capacity);
+        return new UpdateCenterCommand(centerId, name, addressLine1, addressLine2, city, postalCode, contactPhone);
     }
 }

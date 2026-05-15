@@ -1,10 +1,11 @@
-package com.trustamarket.inspectionservice.center.application.dto.command;
+package com.trustamarket.inspectionservice.inspection.adapter.in.messaging;
 
 import java.util.UUID;
 
-public record AssignCenterCommand(
+record InspectionRequestedEvent(
         UUID productId,
         UUID sellerId,
+        UUID centerId,
         long originalPriceAmount,
         String currency
 ) {

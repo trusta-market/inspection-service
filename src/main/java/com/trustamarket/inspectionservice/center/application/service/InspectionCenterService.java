@@ -10,6 +10,7 @@ import com.trustamarket.inspectionservice.center.application.dto.result.Register
 import com.trustamarket.inspectionservice.center.application.dto.result.UpdateCenterResult;
 import com.trustamarket.inspectionservice.center.application.port.in.InspectionCenterUseCase;
 import com.trustamarket.inspectionservice.center.application.port.out.InspectionCenterRepository;
+import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterErrorCode;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
 import com.trustamarket.inspectionservice.center.domain.model.InspectionCenter;
 import com.trustamarket.inspectionservice.center.domain.vo.Address;
@@ -31,7 +32,7 @@ public class InspectionCenterService implements InspectionCenterUseCase {
     @Transactional
     public RegisterCenterResult register(RegisterCenterCommand command) {
         if (inspectionCenterRepository.existsByNameAndAddress(command.name(), command.addressLine1(), command.postalCode())) {
-            throw new InspectionCenterException("이미 존재하는 검사 센터입니다.");
+            throw new InspectionCenterException(InspectionCenterErrorCode.DUPLICATE_CENTER);
         }
 
         Address address = new Address(
@@ -45,8 +46,7 @@ public class InspectionCenterService implements InspectionCenterUseCase {
                 CenterId.generate(),
                 command.name(),
                 address,
-                command.contactPhone(),
-                command.capacity()
+                command.contactPhone()
         );
 
         InspectionCenter saved = inspectionCenterRepository.save(center);
@@ -65,7 +65,6 @@ public class InspectionCenterService implements InspectionCenterUseCase {
         center.rename(command.name());
         center.relocate(new Address(command.addressLine1(), command.addressLine2(), command.city(), command.postalCode()));
         center.updateContactPhone(command.contactPhone());
-        center.updateCapacity(command.capacity());
         InspectionCenter saved = inspectionCenterRepository.save(center);
         return UpdateCenterResult.from(saved);
     }
@@ -124,6 +123,6 @@ public class InspectionCenterService implements InspectionCenterUseCase {
 
     private InspectionCenter findCenterOrThrow(UUID centerId) {
         return inspectionCenterRepository.findById(CenterId.of(centerId))
-                .orElseThrow(() -> new InspectionCenterException("존재하지 않는 센터입니다: " + centerId));
+                .orElseThrow(() -> new InspectionCenterException(InspectionCenterErrorCode.CENTER_NOT_FOUND, centerId.toString()));
     }
 }

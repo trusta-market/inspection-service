@@ -11,10 +11,9 @@ public record RegisterCenterRequest(
         String addressLine2,
         @NotBlank String city,
         @NotBlank String postalCode,
-        String contactPhone,
-        @NotNull @Min(1) Integer capacity
+        String contactPhone
 ) {
     public RegisterCenterCommand toCommand() {
-        return new RegisterCenterCommand(name, addressLine1, addressLine2, city, postalCode, contactPhone, capacity);
+        return new RegisterCenterCommand(name, addressLine1, addressLine2, city, postalCode, contactPhone);
     }
 }

@@ -2,7 +2,7 @@ package com.trustamarket.inspectionservice.inspection.adapter.in.messaging;
 
 import java.util.UUID;
 
-public record DeliveryCompletedEvent(
+record CarrierDeliveryCompletedEvent(
         UUID productId
 ) {
 }

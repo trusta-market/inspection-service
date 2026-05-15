@@ -6,6 +6,5 @@ public record RegisterCenterCommand(
         String addressLine2,
         String city,
         String postalCode,
-        String contactPhone,
-        int capacity
+        String contactPhone
 ) {}

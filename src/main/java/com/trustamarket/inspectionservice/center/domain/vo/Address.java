@@ -1,5 +1,6 @@
 package com.trustamarket.inspectionservice.center.domain.vo;
 
+import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterErrorCode;
 import com.trustamarket.inspectionservice.center.domain.exception.InspectionCenterException;
 
 public record Address(
@@ -10,13 +11,13 @@ public record Address(
 ) {
     public Address {
         if (line1 == null || line1.isBlank()) {
-            throw new InspectionCenterException("주소(line1)는 비어있을 수 없습니다");
+            throw new InspectionCenterException(InspectionCenterErrorCode.INVALID_ADDRESS_LINE1);
         }
         if (city == null || city.isBlank()) {
-            throw new InspectionCenterException("도시(city)는 비어있을 수 없습니다");
+            throw new InspectionCenterException(InspectionCenterErrorCode.INVALID_CITY);
         }
         if (postalCode == null || postalCode.isBlank()) {
-            throw new InspectionCenterException("우편번호(postalCode)는 비어있을 수 없습니다");
+            throw new InspectionCenterException(InspectionCenterErrorCode.INVALID_POSTAL_CODE);
         }
     }
 }

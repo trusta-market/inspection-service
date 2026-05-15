@@ -12,7 +12,6 @@ public record UpdateCenterResponse(
         String city,
         String postalCode,
         String contactPhone,
-        int capacity,
         String status
 ) {
     public static UpdateCenterResponse from(UpdateCenterResult result) {
@@ -24,7 +23,6 @@ public record UpdateCenterResponse(
                 result.city(),
                 result.postalCode(),
                 result.contactPhone(),
-                result.capacity(),
                 result.status().name()
         );
     }

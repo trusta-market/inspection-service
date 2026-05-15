@@ -18,12 +18,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class CenterSlotAssignedConsumerTest {
+class InspectionRequestedConsumerTest {
 
     @Mock
     private RequestInspectionUseCase requestInspectionUseCase;
 
-    private CenterSlotAssignedConsumer consumer;
+    private InspectionRequestedConsumer consumer;
 
     private static final UUID PRODUCT_ID = UUID.fromString("a1b2c3d4-0000-0000-0000-000000000001");
     private static final UUID SELLER_ID  = UUID.fromString("b2c3d4e5-0000-0000-0000-000000000002");
@@ -41,7 +41,7 @@ class CenterSlotAssignedConsumerTest {
 
     @BeforeEach
     void setUp() {
-        consumer = new CenterSlotAssignedConsumer(requestInspectionUseCase, new ObjectMapper());
+        consumer = new InspectionRequestedConsumer(requestInspectionUseCase, new ObjectMapper());
     }
 
     @Test

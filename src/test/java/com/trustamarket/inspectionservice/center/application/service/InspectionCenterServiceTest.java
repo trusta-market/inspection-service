@@ -54,21 +54,7 @@ class InspectionCenterServiceTest {
                 "서울 검수 센터",
                 new Address("강남대로 123", null, "서울", "06000"),
                 "02-1234-5678",
-                10,
-                0,
                 status
-        );
-    }
-
-    private InspectionCenter centerWithLoad(int currentLoad) {
-        return InspectionCenter.restore(
-                CenterId.of(CENTER_ID),
-                "서울 검수 센터",
-                new Address("강남대로 123", null, "서울", "06000"),
-                "02-1234-5678",
-                10,
-                currentLoad,
-                CenterStatus.OPEN
         );
     }
 
@@ -85,8 +71,7 @@ class InspectionCenterServiceTest {
                     "2층",
                     "서울",
                     "06000",
-                    "02-1234-5678",
-                    10
+                    "02-1234-5678"
             );
             given(inspectionCenterRepository.save(any(InspectionCenter.class)))
                     .willAnswer(invocation -> invocation.getArgument(0));
@@ -99,7 +84,7 @@ class InspectionCenterServiceTest {
         }
 
         @Test
-        @DisplayName("등록된 센터는 초기 부하 0, OPEN 상태로 저장된다")
+        @DisplayName("등록된 센터는 OPEN 상태로 저장된다")
         void register_savesWithInitialState() {
             RegisterCenterCommand command = new RegisterCenterCommand(
                     "부산 검수 센터",
@@ -107,8 +92,7 @@ class InspectionCenterServiceTest {
                     null,
                     "부산",
                     "48000",
-                    "051-9876-5432",
-                    5
+                    "051-9876-5432"
             );
             given(inspectionCenterRepository.save(any(InspectionCenter.class)))
                     .willAnswer(invocation -> invocation.getArgument(0));
@@ -120,8 +104,6 @@ class InspectionCenterServiceTest {
 
             InspectionCenter saved = captor.getValue();
             assertThat(saved.getName()).isEqualTo("부산 검수 센터");
-            assertThat(saved.getCapacity()).isEqualTo(5);
-            assertThat(saved.getCurrentLoad()).isEqualTo(0);
             assertThat(saved.getStatus()).isEqualTo(CenterStatus.OPEN);
         }
 
@@ -134,31 +116,12 @@ class InspectionCenterServiceTest {
                     null,
                     "서울",
                     "06000",
-                    "02-1234-5678",
-                    10
+                    "02-1234-5678"
             );
 
             assertThatThrownBy(() -> inspectionCenterService.register(command))
                     .isInstanceOf(InspectionCenterException.class)
                     .hasMessageContaining("name");
-        }
-
-        @Test
-        @DisplayName("capacity가 0이면 InspectionCenterException을 던진다")
-        void register_zeroCapacity_throwsException() {
-            RegisterCenterCommand command = new RegisterCenterCommand(
-                    "서울 검수 센터",
-                    "강남대로 123",
-                    null,
-                    "서울",
-                    "06000",
-                    "02-1234-5678",
-                    0
-            );
-
-            assertThatThrownBy(() -> inspectionCenterService.register(command))
-                    .isInstanceOf(InspectionCenterException.class)
-                    .hasMessageContaining("capacity");
         }
 
         @Test
@@ -170,8 +133,7 @@ class InspectionCenterServiceTest {
                     null,
                     "서울",
                     "06000",
-                    "02-1234-5678",
-                    10
+                    "02-1234-5678"
             );
             given(inspectionCenterRepository.existsByNameAndAddress(anyString(), anyString(), anyString()))
                     .willReturn(true);
@@ -192,8 +154,7 @@ class InspectionCenterServiceTest {
                     null,
                     "서울",
                     "06000",
-                    "02-1234-5678",
-                    10
+                    "02-1234-5678"
             );
 
             assertThatThrownBy(() -> inspectionCenterService.register(command))
@@ -380,8 +341,6 @@ class InspectionCenterServiceTest {
             assertThat(result.name()).isEqualTo("서울 검수 센터");
             assertThat(result.addressLine1()).isEqualTo("강남대로 123");
             assertThat(result.city()).isEqualTo("서울");
-            assertThat(result.capacity()).isEqualTo(10);
-            assertThat(result.currentLoad()).isEqualTo(0);
             assertThat(result.status()).isEqualTo(CenterStatus.OPEN);
         }
 
@@ -459,8 +418,7 @@ class InspectionCenterServiceTest {
                     "3층",
                     "부산",
                     "48000",
-                    "051-9876-5432",
-                    20
+                    "051-9876-5432"
             );
         }
 
@@ -480,7 +438,6 @@ class InspectionCenterServiceTest {
             assertThat(result.city()).isEqualTo("부산");
             assertThat(result.postalCode()).isEqualTo("48000");
             assertThat(result.contactPhone()).isEqualTo("051-9876-5432");
-            assertThat(result.capacity()).isEqualTo(20);
             assertThat(result.status()).isEqualTo(CenterStatus.OPEN);
         }
 
@@ -500,7 +457,6 @@ class InspectionCenterServiceTest {
             assertThat(saved.getName()).isEqualTo("부산 검수 센터");
             assertThat(saved.getAddress().line1()).isEqualTo("해운대로 456");
             assertThat(saved.getAddress().city()).isEqualTo("부산");
-            assertThat(saved.getCapacity()).isEqualTo(20);
             assertThat(saved.getContactPhone()).isEqualTo("051-9876-5432");
         }
 
@@ -519,7 +475,7 @@ class InspectionCenterServiceTest {
         void updateCenter_blankName_throwsException() {
             InspectionCenter center = centerInStatus(CenterStatus.OPEN);
             given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
-            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "", "해운대로 456", null, "부산", "48000", null, 20);
+            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "", "해운대로 456", null, "부산", "48000", null);
 
             assertThatThrownBy(() -> inspectionCenterService.updateCenter(command))
                     .isInstanceOf(InspectionCenterException.class)
@@ -531,7 +487,7 @@ class InspectionCenterServiceTest {
         void updateCenter_blankAddressLine1_throwsException() {
             InspectionCenter center = centerInStatus(CenterStatus.OPEN);
             given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
-            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "부산 검수 센터", "", null, "부산", "48000", null, 20);
+            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "부산 검수 센터", "", null, "부산", "48000", null);
 
             assertThatThrownBy(() -> inspectionCenterService.updateCenter(command))
                     .isInstanceOf(InspectionCenterException.class)
@@ -539,35 +495,11 @@ class InspectionCenterServiceTest {
         }
 
         @Test
-        @DisplayName("capacity가 0이면 InspectionCenterException을 던진다")
-        void updateCenter_zeroCapacity_throwsException() {
-            InspectionCenter center = centerInStatus(CenterStatus.OPEN);
-            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
-            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "부산 검수 센터", "해운대로 456", null, "부산", "48000", null, 0);
-
-            assertThatThrownBy(() -> inspectionCenterService.updateCenter(command))
-                    .isInstanceOf(InspectionCenterException.class)
-                    .hasMessageContaining("capacity");
-        }
-
-        @Test
-        @DisplayName("capacity가 currentLoad보다 작으면 InspectionCenterException을 던진다")
-        void updateCenter_capacityBelowCurrentLoad_throwsException() {
-            InspectionCenter center = centerWithLoad(5);
-            given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
-            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "부산 검수 센터", "해운대로 456", null, "부산", "48000", null, 3);
-
-            assertThatThrownBy(() -> inspectionCenterService.updateCenter(command))
-                    .isInstanceOf(InspectionCenterException.class)
-                    .hasMessageContaining("현재 부하");
-        }
-
-        @Test
         @DisplayName("contactPhone이 빈 문자열이면 InspectionCenterException을 던진다")
         void updateCenter_blankContactPhone_throwsException() {
             InspectionCenter center = centerInStatus(CenterStatus.OPEN);
             given(inspectionCenterRepository.findById(CenterId.of(CENTER_ID))).willReturn(Optional.of(center));
-            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "부산 검수 센터", "해운대로 456", null, "부산", "48000", "", 20);
+            UpdateCenterCommand command = new UpdateCenterCommand(CENTER_ID, "부산 검수 센터", "해운대로 456", null, "부산", "48000", "");
 
             assertThatThrownBy(() -> inspectionCenterService.updateCenter(command))
                     .isInstanceOf(InspectionCenterException.class)

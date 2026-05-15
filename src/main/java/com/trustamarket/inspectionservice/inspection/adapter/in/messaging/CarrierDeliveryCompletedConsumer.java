@@ -12,18 +12,18 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DeliveryCompletedConsumer {
+public class CarrierDeliveryCompletedConsumer {
 
     private final MarkArrivedUseCase markArrivedUseCase;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "delivery.completed", groupId = "inspection-service")
+    @KafkaListener(topics = "carrier.delivery_completed", groupId = "inspection-service")
     public void consume(String payload) {
-        DeliveryCompletedEvent event;
+        CarrierDeliveryCompletedEvent event;
         try {
-            event = objectMapper.readValue(payload, DeliveryCompletedEvent.class);
+            event = objectMapper.readValue(payload, CarrierDeliveryCompletedEvent.class);
         } catch (JsonProcessingException e) {
-            log.error("delivery.completed 이벤트 역직렬화 실패: payload={}", payload, e);
+            log.error("carrier.delivery_completed 이벤트 역직렬화 실패: payload={}", payload, e);
             throw new RuntimeException(e);
         }
 

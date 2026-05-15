@@ -13,8 +13,6 @@ public record GetCenterResult(
         String city,
         String postalCode,
         String contactPhone,
-        int capacity,
-        int currentLoad,
         CenterStatus status
 ) {
     public static GetCenterResult from(InspectionCenter center) {
@@ -26,8 +24,6 @@ public record GetCenterResult(
                 center.getAddress().city(),
                 center.getAddress().postalCode(),
                 center.getContactPhone(),
-                center.getCapacity(),
-                center.getCurrentLoad(),
                 center.getStatus()
         );
     }

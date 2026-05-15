@@ -9,6 +9,5 @@ public record UpdateCenterCommand(
         String addressLine2,
         String city,
         String postalCode,
-        String contactPhone,
-        int capacity
+        String contactPhone
 ) {}
