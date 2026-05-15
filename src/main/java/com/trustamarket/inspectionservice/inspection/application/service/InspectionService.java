@@ -16,9 +16,11 @@ import com.trustamarket.inspectionservice.inspection.application.event.Inspectio
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionReturnCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.PricingCompletedEvent;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetCenterIdByProductIdResult;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteReturnUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.FailInspectionUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.in.GetCenterIdByProductIdUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.GetInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.MarkArrivedUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.RequestInspectionUseCase;
@@ -47,7 +49,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class InspectionService implements RequestInspectionUseCase, MarkArrivedUseCase, StartInspectionUseCase,
-        CompleteInspectionUseCase, FailInspectionUseCase, CompleteReturnUseCase, GetInspectionUseCase {
+        CompleteInspectionUseCase, FailInspectionUseCase, CompleteReturnUseCase, GetInspectionUseCase,
+        GetCenterIdByProductIdUseCase {
 
     private final InspectionRepository inspectionRepository;
     private final InspectionEventPublisher inspectionEventPublisher;
@@ -167,5 +170,13 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
         Inspection inspection = inspectionRepository.findById(InspectionId.of(inspectionId))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + inspectionId));
         return GetInspectionResult.from(inspection);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetCenterIdByProductIdResult getCenterId(UUID productId) {
+        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(productId))
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + productId));
+        return new GetCenterIdByProductIdResult(inspection.getCenterId().value());
     }
 }
