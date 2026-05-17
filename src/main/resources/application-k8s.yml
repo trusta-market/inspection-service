@@ -15,6 +15,12 @@ spring:
     url: jdbc:postgresql://postgres:5432/trusta_market
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  # inspection / delivery 가 같은 V001__init.sql changeset (id 1-4, author seungwon) 을 쓰는데
+  # 두 service 가 public.databasechangelog 공유하면 file 내용 다를 때 checksum mismatch.
+  # → p_inspection schema 의 databasechangelog 으로 분리. row 는 별도 SQL 로 NULL md5 박아둠 (Liquibase 가 부팅 시 재계산).
+  liquibase:
+    default-schema: p_inspection
+    liquibase-schema: p_inspection
   jpa:
     hibernate:
       ddl-auto: update
