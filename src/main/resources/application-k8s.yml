@@ -29,11 +29,6 @@ spring:
         default_schema: p_inspection
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yml
-    default-schema: p_inspection
-    liquibase-schema: p_inspection
   # Kafka — GKE namespace 'kafka' 의 StatefulSet 3 broker.
   # KafkaListener 가 Acknowledgment 안 받음 → default ack-mode 사용 (manual 박지 말 것).
   kafka:
