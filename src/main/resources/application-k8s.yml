@@ -23,10 +23,10 @@ spring:
     url: jdbc:postgresql://${DB_HOST:postgres}:5432/trusta_market
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    # HikariCP pool — default 10 이 thread 800 대비 너무 작아서 thread 가 pool 대기.
-    # postgres max_connections=700 안에서 7 DB service × pool 18 × HPA max 5 = 630 (안전선).
+    # HikariCP pool — Cloud SQL max_connections=2500 안에서 6 service 통일 + product 만 2배 (120).
+    # 합 = 6 × 60 × 5 + 5 × 120 = 2400 / 2500 ✓.
     hikari:
-      maximum-pool-size: 18
+      maximum-pool-size: 60
   # inspection / delivery 가 같은 V001__init.sql changeset (id 1-4, author seungwon) 을 쓰는데
   # 두 service 가 public.databasechangelog 공유하면 file 내용 다를 때 checksum mismatch.
   # → p_inspection schema 의 databasechangelog 으로 분리. row 는 별도 SQL 로 NULL md5 박아둠 (Liquibase 가 부팅 시 재계산).
