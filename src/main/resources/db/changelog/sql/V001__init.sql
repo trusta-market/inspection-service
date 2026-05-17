@@ -9,8 +9,6 @@ CREATE TABLE IF NOT EXISTS p_inspection_centers (
     city          VARCHAR(255) NOT NULL,
     postal_code   VARCHAR(255) NOT NULL,
     contact_phone VARCHAR(255),
-    capacity      INTEGER      NOT NULL,
-    current_load  INTEGER      NOT NULL DEFAULT 0,
     status        VARCHAR(50)  NOT NULL,
     created_at    TIMESTAMPTZ  NOT NULL,
     updated_at    TIMESTAMPTZ  NOT NULL,
