@@ -440,12 +440,12 @@ class InspectionServiceTest {
     class GetInspection {
 
         @Test
-        @DisplayName("inspectionId로 검수 상세 정보를 반환한다")
+        @DisplayName("판매자 본인이 조회하면 검수 상세 정보를 반환한다")
         void getInspection_success() {
             Inspection inspection = requestedInspection();
             given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
 
-            GetInspectionResult result = inspectionService.getInspection(inspection.getId().value());
+            GetInspectionResult result = inspectionService.getInspection(inspection.getId().value(), SELLER_ID, false);
 
             assertThat(result.inspectionId()).isEqualTo(inspection.getId().value());
             assertThat(result.productId()).isEqualTo(PRODUCT_ID);
@@ -454,12 +454,33 @@ class InspectionServiceTest {
         }
 
         @Test
+        @DisplayName("INSPECTOR/ADMIN 권한이면 타인의 검수도 조회할 수 있다")
+        void getInspection_privileged_success() {
+            Inspection inspection = requestedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            GetInspectionResult result = inspectionService.getInspection(inspection.getId().value(), UUID.randomUUID(), true);
+
+            assertThat(result.inspectionId()).isEqualTo(inspection.getId().value());
+        }
+
+        @Test
+        @DisplayName("MEMBER가 타인의 검수를 조회하면 INSPECTION_ACCESS_DENIED 예외를 던진다")
+        void getInspection_otherMember_throwsAccessDenied() {
+            Inspection inspection = requestedInspection();
+            given(inspectionRepository.findById(inspection.getId())).willReturn(Optional.of(inspection));
+
+            assertThatThrownBy(() -> inspectionService.getInspection(inspection.getId().value(), UUID.randomUUID(), false))
+                    .isInstanceOf(InspectionException.class);
+        }
+
+        @Test
         @DisplayName("inspectionId에 해당하는 검수 요청이 없으면 InspectionException을 던진다")
         void getInspection_notFound_throwsException() {
             UUID unknownId = UUID.randomUUID();
             given(inspectionRepository.findById(InspectionId.of(unknownId))).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> inspectionService.getInspection(unknownId))
+            assertThatThrownBy(() -> inspectionService.getInspection(unknownId, UUID.randomUUID(), true))
                     .isInstanceOf(InspectionException.class)
                     .hasMessageContaining(unknownId.toString());
         }

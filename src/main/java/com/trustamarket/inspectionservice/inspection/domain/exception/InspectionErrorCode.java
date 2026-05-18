@@ -17,7 +17,8 @@ public enum InspectionErrorCode implements ErrorCodeSpec {
     INVALID_SELLER_ID("IN-010", HttpStatus.BAD_REQUEST, "SellerId는 null일 수 없습니다", ""),
     INVALID_INSPECTION_ID("IN-011", HttpStatus.BAD_REQUEST, "InspectionId는 null일 수 없습니다", ""),
     INVALID_PRODUCT_ID("IN-012", HttpStatus.BAD_REQUEST, "ProductId는 null일 수 없습니다", ""),
-    INVALID_MONEY_AMOUNT("IN-013", HttpStatus.BAD_REQUEST, "금액(amount)은 음수일 수 없습니다", "amount");
+    INVALID_MONEY_AMOUNT("IN-013", HttpStatus.BAD_REQUEST, "금액(amount)은 음수일 수 없습니다", "amount"),
+    INSPECTION_ACCESS_DENIED("IN-014", HttpStatus.FORBIDDEN, "본인의 검수 정보만 조회할 수 있습니다", "");
 
     private final String code;
     private final HttpStatus status;

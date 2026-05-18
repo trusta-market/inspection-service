@@ -10,5 +10,5 @@ public interface GetInspectionUseCase {
 
     GetInspectionPageResult getMyInspections(GetMyInspectionsQuery query);
 
-    GetInspectionResult getInspection(UUID inspectionId);
+    GetInspectionResult getInspection(UUID inspectionId, UUID requesterId, boolean isPrivileged);
 }

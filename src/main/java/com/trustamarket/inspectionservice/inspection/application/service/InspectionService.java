@@ -191,9 +191,12 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
 
     @Override
     @Transactional(readOnly = true)
-    public GetInspectionResult getInspection(UUID inspectionId) {
+    public GetInspectionResult getInspection(UUID inspectionId, UUID requesterId, boolean isPrivileged) {
         Inspection inspection = inspectionRepository.findById(InspectionId.of(inspectionId))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + inspectionId));
+        if (!isPrivileged && !inspection.getSellerId().value().equals(requesterId)) {
+            throw new InspectionException(InspectionErrorCode.INSPECTION_ACCESS_DENIED);
+        }
         return GetInspectionResult.from(inspection);
     }
 
