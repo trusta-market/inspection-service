@@ -2,37 +2,25 @@
 
 server:
   port: 8201
-  # Tomcat — 부하 테스트 결과로 default threads.max=200 이 단일 pod 의 동시 처리 한계.
-  # 800 으로 증액 (stack ~800MB, memory limit 2Gi 안). accept-count 도 같이 늘려서 queue 더 받음.
-  tomcat:
-    threads:
-      max: 800
-    accept-count: 300
-    max-connections: 20000
 
 spring:
   config:
     import: "optional:configserver:http://config-server"
+
   cloud:
     config:
       uri: http://config-server
       label: develop
       fail-fast: false
   datasource:
-    # DB_HOST env 로 endpoint 주입 (Secret domain-postgres-secrets). default = postgres (in-cluster fallback).
     url: jdbc:postgresql://${DB_HOST:postgres}:5432/trusta_market
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    # HikariCP pool — 8차 결과로 pool 60 은 GC pause + tail latency 폭증 (DB 한가, connection state heap 점유).
-    # 6차 sweet spot (pool 18) 으로 복귀.
-    hikari:
-      maximum-pool-size: 18
-  # inspection / delivery 가 같은 V001__init.sql changeset (id 1-4, author seungwon) 을 쓰는데
-  # 두 service 가 public.databasechangelog 공유하면 file 내용 다를 때 checksum mismatch.
-  # → p_inspection schema 의 databasechangelog 으로 분리. row 는 별도 SQL 로 NULL md5 박아둠 (Liquibase 가 부팅 시 재계산).
+
   liquibase:
     default-schema: p_inspection
     liquibase-schema: p_inspection
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -41,8 +29,7 @@ spring:
         default_schema: p_inspection
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
-  # Kafka — GKE namespace 'kafka' 의 StatefulSet 3 broker.
-  # KafkaListener 가 Acknowledgment 안 받음 → default ack-mode 사용 (manual 박지 말 것).
+
   kafka:
     bootstrap-servers: kafka.kafka:9092
     consumer:
@@ -59,11 +46,10 @@ eureka:
       defaultZone: http://eureka-server/eureka/
     register-with-eureka: true
     fetch-registry: true
+
   instance:
     prefer-ip-address: true
 
-# common 의 LoginFilter 가 gateway 의 X-User-* 헤더 → SecurityContext 로 주입.
-# false (default) 면 LoginFilter 가 전체 skip → /api/v1/centers 등 인증 path 가 401 반환.
 trusta:
   security:
     trust-gateway-headers: true
