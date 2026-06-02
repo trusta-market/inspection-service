@@ -61,9 +61,14 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Override
     @Transactional
     public void request(RequestInspectionCommand command) {
+        ProductId productId = ProductId.of(command.productId());
+        // 1 product → 1 inspection 불변식. Inbox(eventId) 우회 시에도 productId 기준 도메인 가드로 중복 생성 차단.
+        if (inspectionRepository.findByProductId(productId).isPresent()) {
+            return;
+        }
         Inspection inspection = Inspection.request(
                 InspectionId.generate(),
-                ProductId.of(command.productId()),
+                productId,
                 SellerId.of(command.sellerId()),
                 CenterId.of(command.centerId()),
                 Money.of(command.originalPriceAmount(), CurrencyCode.valueOf(command.currency())),

@@ -2,3 +2,6 @@ databaseChangeLog:
   - include:
       file: sql/V001__init.sql
       relativeToChangelogFile: true
+  - include:
+      file: sql/V002__create_inbox.sql
+      relativeToChangelogFile: true

@@ -4,23 +4,26 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RejectPriceCommand;
 import com.trustamarket.inspectionservice.inspection.application.port.in.RejectPriceUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.out.InboxPurpose;
+import com.trustamarket.inspectionservice.inspection.application.service.InboxMessageHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class InspectionPriceRejectedConsumer {
 
+    private static final String CONSUMER_GROUP = "inspection-service";
+
     private final RejectPriceUseCase rejectPriceUseCase;
+    private final InboxMessageHandler inboxMessageHandler;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "inspection.price.rejected", groupId = "inspection-service")
+    @KafkaListener(topics = "inspection.price.rejected", groupId = CONSUMER_GROUP)
     public void consume(String payload, Acknowledgment ack) {
         InspectionPriceRejectedEvent event;
         try {
@@ -31,11 +34,16 @@ public class InspectionPriceRejectedConsumer {
             ack.acknowledge();
             return;
         }
-        rejectPriceUseCase.reject(new RejectPriceCommand(event.productId()));
-        log.info("가격 거절 처리 완료 (반송 예정): productId={}", event.productId());
-        // 처리 성공 후 오프셋 커밋 — manual ack 모드에서 ack 누락 시 미커밋→재기동 시 토픽 전체 재소비(#61)
+
+        boolean processed = inboxMessageHandler.process(
+                event.eventId(), CONSUMER_GROUP, InboxPurpose.INSPECTION_PRICE_REJECTED,
+                () -> rejectPriceUseCase.reject(new RejectPriceCommand(event.productId())));
+
+        if (processed) {
+            log.info("가격 거절 처리 완료 (반송 예정): eventId={}, productId={}", event.eventId(), event.productId());
+        } else {
+            log.info("inspection.price.rejected 중복 메시지 — skip: eventId={}, productId={}", event.eventId(), event.productId());
+        }
         ack.acknowledge();
     }
-
-    record InspectionPriceRejectedEvent(UUID productId, UUID sellerId, String reason) {}
 }
