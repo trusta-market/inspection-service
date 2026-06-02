@@ -135,6 +135,17 @@ class InspectionServiceTest {
             UUID second = captor.getAllValues().get(1).getId().value();
             assertThat(first).isNotEqualTo(second);
         }
+
+        @Test
+        @DisplayName("같은 productId의 검수가 이미 있으면 새로 생성하지 않고 skip한다 (1 product → 1 inspection)")
+        void request_duplicateProductId_skips() {
+            given(inspectionRepository.findByProductId(ProductId.of(PRODUCT_ID)))
+                    .willReturn(Optional.of(requestedInspection()));
+
+            inspectionService.request(validCommand());
+
+            then(inspectionRepository).should(org.mockito.Mockito.never()).save(any(Inspection.class));
+        }
     }
 
     @Nested
