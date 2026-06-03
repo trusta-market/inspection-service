@@ -1,6 +1,8 @@
 package com.trustamarket.inspectionservice.inspection.adapter.out.persistence.inbox;
 
 import com.trustamarket.inspectionservice.inspection.application.port.out.InboxPurpose;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionErrorCode;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -49,10 +51,10 @@ public class InboxJpaEntity {
     }
 
     public static InboxJpaEntity forKafkaEvent(UUID eventId, String consumerGroup, InboxPurpose purpose) {
-        Objects.requireNonNull(eventId, "eventId must not be null");
-        Objects.requireNonNull(purpose, "purpose must not be null");
+        Objects.requireNonNull(eventId, "eventId는 null일 수 없습니다");
+        Objects.requireNonNull(purpose, "purpose는 null일 수 없습니다");
         if (consumerGroup == null || consumerGroup.isBlank()) {
-            throw new IllegalArgumentException("consumerGroup must not be blank");
+            throw new InspectionException(InspectionErrorCode.INVALID_CONSUMER_GROUP);
         }
         return new InboxJpaEntity(UUID.randomUUID(), eventId, consumerGroup, purpose, Instant.now());
     }
