@@ -2,12 +2,10 @@ package com.trustamarket.inspectionservice.inspection.adapter.in.messaging;
 
 import java.util.UUID;
 
-record InspectionRequestedEvent(
+public record InspectionPriceRejectedEvent(
         UUID eventId,
         UUID productId,
         UUID sellerId,
-        UUID centerId,
-        long originalPriceAmount,
-        String currency
+        String reason
 ) {
 }
