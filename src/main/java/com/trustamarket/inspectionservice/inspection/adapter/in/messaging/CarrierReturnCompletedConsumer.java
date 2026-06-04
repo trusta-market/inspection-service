@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteReturnCommand;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteReturnUseCase;
+import com.trustamarket.inspectionservice.inspection.application.port.out.InboxPurpose;
+import com.trustamarket.inspectionservice.inspection.application.service.InboxMessageHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,10 +17,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CarrierReturnCompletedConsumer {
 
+    private static final String CONSUMER_GROUP = "inspection-service";
+
     private final CompleteReturnUseCase completeReturnUseCase;
+    private final InboxMessageHandler inboxMessageHandler;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "carrier.return_completed", groupId = "inspection-service")
+    // dedup+도메인은 InboxMessageHandler가 한 트랜잭션으로 처리. 반환 시점엔 커밋 완료 → 동기 ack 안전(유실 0).
+    @KafkaListener(topics = "carrier.return_completed", groupId = CONSUMER_GROUP)
     public void consume(String payload, Acknowledgment ack) {
         CarrierReturnCompletedEvent event;
         try {
@@ -30,9 +36,15 @@ public class CarrierReturnCompletedConsumer {
             return;
         }
 
-        completeReturnUseCase.completeReturn(new CompleteReturnCommand(event.productId()));
-        log.info("반송 완료 처리: productId={}", event.productId());
-        // 처리 성공 후 오프셋 커밋 — manual ack 모드에서 ack 누락 시 미커밋→재기동 시 토픽 전체 재소비(#61)
+        boolean processed = inboxMessageHandler.process(
+                event.eventId(), CONSUMER_GROUP, InboxPurpose.CARRIER_RETURN_COMPLETED,
+                () -> completeReturnUseCase.completeReturn(new CompleteReturnCommand(event.productId())));
+
+        if (processed) {
+            log.info("반송 완료 처리: eventId={}, productId={}", event.eventId(), event.productId());
+        } else {
+            log.info("carrier.return_completed 중복 메시지 — skip: eventId={}, productId={}", event.eventId(), event.productId());
+        }
         ack.acknowledge();
     }
 }
