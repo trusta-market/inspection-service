@@ -5,3 +5,6 @@ databaseChangeLog:
   - include:
       file: sql/V002__create_inbox.sql
       relativeToChangelogFile: true
+  - include:
+      file: sql/V003__add_seller_id_index.sql
+      relativeToChangelogFile: true
