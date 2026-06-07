@@ -23,14 +23,12 @@ public class CarrierDeliveryCompletedConsumer {
     private final InboxMessageHandler inboxMessageHandler;
     private final ObjectMapper objectMapper;
 
-    // dedup+도메인은 InboxMessageHandler가 한 트랜잭션으로 처리. 반환 시점엔 커밋 완료 → 동기 ack 안전(유실 0).
     @KafkaListener(topics = "carrier.delivery_completed", groupId = CONSUMER_GROUP)
     public void consume(String payload, Acknowledgment ack) {
         CarrierDeliveryCompletedEvent event;
         try {
             event = objectMapper.readValue(payload, CarrierDeliveryCompletedEvent.class);
         } catch (JsonProcessingException e) {
-            // 잘못된 payload는 재시도해도 실패 → ack로 건너뛰어 무한 재소비(poison-pill) 차단
             log.error("carrier.delivery_completed 이벤트 역직렬화 실패 — skip: payload={}", payload, e);
             ack.acknowledge();
             return;

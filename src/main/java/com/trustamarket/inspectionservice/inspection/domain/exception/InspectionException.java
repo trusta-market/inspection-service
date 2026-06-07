@@ -1,7 +1,9 @@
 package com.trustamarket.inspectionservice.inspection.domain.exception;
 
 import com.trustamarket.common.exception.CustomException;
+import lombok.Getter;
 
+@Getter
 public class InspectionException extends CustomException {
 
     private final InspectionErrorCode errorCode;
@@ -19,9 +21,5 @@ public class InspectionException extends CustomException {
     @Override
     public String getType() {
         return errorCode.getCode();
-    }
-
-    public InspectionErrorCode getErrorCode() {
-        return errorCode;
     }
 }

@@ -17,8 +17,6 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-// p_inspection_inboxes — Kafka 메시지 멱등성 기록.
-// (event_id, consumer_group) UNIQUE — at-least-once 재배달 시 동일 메시지 중복 처리 차단.
 @Entity
 @Table(name = "p_inspection_inboxes")
 @Getter
