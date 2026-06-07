@@ -9,10 +9,23 @@ import com.trustamarket.inspectionservice.inspection.domain.vo.Money;
 import com.trustamarket.inspectionservice.inspection.domain.vo.PhotoId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.SellerId;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import org.springframework.stereotype.Component;
 
 @Component
 public class InspectionMapper {
+
+    public GetInspectionSummaryResult toSummaryResult(InspectionSummaryProjection projection) {
+        return new GetInspectionSummaryResult(
+                projection.inspectionId(),
+                projection.productId(),
+                projection.centerId(),
+                projection.originalPriceAmount().longValue(),
+                projection.originalPriceCurrency().name(),
+                projection.status(),
+                projection.requestedAt()
+        );
+    }
 
     public InspectionJpaEntity toJpaEntity(Inspection inspection) {
         return InspectionJpaEntity.of(

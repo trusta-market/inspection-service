@@ -1,5 +1,6 @@
 package com.trustamarket.inspectionservice.inspection.application.port.out;
 
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
@@ -16,7 +17,7 @@ public interface InspectionRepository {
 
     Optional<Inspection> findByProductId(ProductId productId);
 
-    List<Inspection> findBySellerId(SellerId sellerId, int page, int size);
+    List<GetInspectionSummaryResult> findSummariesBySellerId(SellerId sellerId, int page, int size);
 
     long countBySellerId(SellerId sellerId);
 }
