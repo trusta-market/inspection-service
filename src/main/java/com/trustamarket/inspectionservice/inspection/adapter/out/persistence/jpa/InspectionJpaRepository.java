@@ -2,6 +2,8 @@ package com.trustamarket.inspectionservice.inspection.adapter.out.persistence.jp
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +15,14 @@ public interface InspectionJpaRepository extends JpaRepository<InspectionJpaEnti
 
     Optional<InspectionJpaEntity> findByProductIdAndDeletedAtIsNull(UUID productId);
 
-    List<InspectionJpaEntity> findBySellerIdAndDeletedAtIsNull(UUID sellerId, Pageable pageable);
+    @Query("""
+            SELECT new com.trustamarket.inspectionservice.inspection.adapter.out.persistence.jpa.InspectionSummaryProjection(
+                i.inspectionId, i.productId, i.centerId,
+                i.originalPriceAmount, i.originalPriceCurrency, i.status, i.requestedAt)
+            FROM InspectionJpaEntity i
+            WHERE i.sellerId = :sellerId AND i.deletedAt IS NULL
+            """)
+    List<InspectionSummaryProjection> findSummariesBySellerId(@Param("sellerId") UUID sellerId, Pageable pageable);
 
     long countBySellerIdAndDeletedAtIsNull(UUID sellerId);
 }

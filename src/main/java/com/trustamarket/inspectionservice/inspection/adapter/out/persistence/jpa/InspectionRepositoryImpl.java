@@ -1,5 +1,6 @@
 package com.trustamarket.inspectionservice.inspection.adapter.out.persistence.jpa;
 
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
@@ -40,10 +41,10 @@ public class InspectionRepositoryImpl implements InspectionRepository {
     }
 
     @Override
-    public List<Inspection> findBySellerId(SellerId sellerId, int page, int size) {
-        return jpaRepository.findBySellerIdAndDeletedAtIsNull(sellerId.value(), PageRequest.of(page, size))
+    public List<GetInspectionSummaryResult> findSummariesBySellerId(SellerId sellerId, int page, int size) {
+        return jpaRepository.findSummariesBySellerId(sellerId.value(), PageRequest.of(page, size))
                 .stream()
-                .map(mapper::toDomain)
+                .map(mapper::toSummaryResult)
                 .toList();
     }
 

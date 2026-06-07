@@ -1,9 +1,7 @@
 package com.trustamarket.inspectionservice.center.adapter.in.web.dto.request;
 
 import com.trustamarket.inspectionservice.center.application.dto.command.RegisterCenterCommand;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record RegisterCenterRequest(
         @NotBlank String name,

@@ -29,7 +29,6 @@ public class InspectionPriceRejectedConsumer {
         try {
             event = objectMapper.readValue(payload, InspectionPriceRejectedEvent.class);
         } catch (JsonProcessingException e) {
-            // 잘못된 payload는 재시도해도 실패 → ack로 건너뛰어 무한 재소비(poison-pill) 차단
             log.error("inspection.price.rejected 역직렬화 실패 — skip: payload={}", payload, e);
             ack.acknowledge();
             return;

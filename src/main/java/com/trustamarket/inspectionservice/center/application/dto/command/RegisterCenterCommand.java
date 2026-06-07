@@ -7,4 +7,5 @@ public record RegisterCenterCommand(
         String city,
         String postalCode,
         String contactPhone
-) {}
+) {
+}

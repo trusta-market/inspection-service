@@ -12,6 +12,7 @@ import com.trustamarket.inspectionservice.inspection.application.dto.command.Sta
 import com.trustamarket.inspectionservice.inspection.application.dto.query.GetMyInspectionsQuery;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionPageResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionEventPublisher;
@@ -412,17 +413,20 @@ class InspectionServiceTest {
         @Test
         @DisplayName("셀러의 검수 목록을 페이징하여 반환한다")
         void getMyInspections_success() {
-            Inspection inspection = requestedInspection();
+            UUID inspectionId = UUID.randomUUID();
+            GetInspectionSummaryResult summary = new GetInspectionSummaryResult(
+                    inspectionId, PRODUCT_ID, CENTER_ID, 1_500_000L, "KRW",
+                    InspectionStatus.REQUESTED, Instant.now());
             SellerId sellerId = SellerId.of(SELLER_ID);
-            given(inspectionRepository.findBySellerId(eq(sellerId), anyInt(), anyInt()))
-                    .willReturn(List.of(inspection));
+            given(inspectionRepository.findSummariesBySellerId(eq(sellerId), anyInt(), anyInt()))
+                    .willReturn(List.of(summary));
             given(inspectionRepository.countBySellerId(sellerId)).willReturn(1L);
 
             GetInspectionPageResult result = inspectionService.getMyInspections(
                     new GetMyInspectionsQuery(SELLER_ID, 0, 10));
 
             assertThat(result.content()).hasSize(1);
-            assertThat(result.content().get(0).inspectionId()).isEqualTo(inspection.getId().value());
+            assertThat(result.content().get(0).inspectionId()).isEqualTo(inspectionId);
             assertThat(result.page()).isZero();
             assertThat(result.size()).isEqualTo(10);
             assertThat(result.totalElements()).isEqualTo(1L);
@@ -433,7 +437,7 @@ class InspectionServiceTest {
         @DisplayName("검수 요청이 없으면 빈 목록을 반환한다")
         void getMyInspections_empty() {
             SellerId sellerId = SellerId.of(SELLER_ID);
-            given(inspectionRepository.findBySellerId(eq(sellerId), anyInt(), anyInt()))
+            given(inspectionRepository.findSummariesBySellerId(eq(sellerId), anyInt(), anyInt()))
                     .willReturn(List.of());
             given(inspectionRepository.countBySellerId(sellerId)).willReturn(0L);
 

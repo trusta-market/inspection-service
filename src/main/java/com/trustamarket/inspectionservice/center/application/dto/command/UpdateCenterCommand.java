@@ -10,4 +10,5 @@ public record UpdateCenterCommand(
         String city,
         String postalCode,
         String contactPhone
-) {}
+) {
+}

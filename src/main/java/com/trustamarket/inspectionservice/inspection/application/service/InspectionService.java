@@ -183,13 +183,9 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Transactional(readOnly = true)
     public GetInspectionPageResult getMyInspections(GetMyInspectionsQuery query) {
         SellerId sellerId = SellerId.of(query.userId());
-        List<Inspection> inspections = inspectionRepository.findBySellerId(sellerId, query.page(), query.size());
+        List<GetInspectionSummaryResult> content = inspectionRepository.findSummariesBySellerId(sellerId, query.page(), query.size());
         long total = inspectionRepository.countBySellerId(sellerId);
         int totalPages = (int) Math.ceil((double) total / query.size());
-
-        List<GetInspectionSummaryResult> content = inspections.stream()
-                .map(GetInspectionSummaryResult::from)
-                .toList();
 
         return new GetInspectionPageResult(content, query.page(), query.size(), total, totalPages);
     }
