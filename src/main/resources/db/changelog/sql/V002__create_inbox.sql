@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset seungwon:4
+--changeset Seungwon-Choi:4
 CREATE TABLE IF NOT EXISTS p_inspection_inboxes (
     id             UUID         PRIMARY KEY,
     event_id       UUID         NOT NULL,
