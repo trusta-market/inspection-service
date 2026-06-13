@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset seungwon:1
+--changeset Seungwon-Choi:1
 CREATE TABLE IF NOT EXISTS p_inspection_centers (
     center_id     UUID         PRIMARY KEY,
     name          VARCHAR(255) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS p_inspection_centers (
     CONSTRAINT p_inspection_centers_status_check CHECK (status IN ('OPEN', 'MAINTENANCE', 'CLOSED'))
 );
 
---changeset seungwon:2
+--changeset Seungwon-Choi:2
 CREATE TABLE IF NOT EXISTS p_inspections (
     inspection_id            UUID           PRIMARY KEY,
     product_id               UUID           NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS p_inspections (
     deleted_by               VARCHAR(255)
 );
 
---changeset seungwon:3
+--changeset Seungwon-Choi:3
 CREATE TABLE IF NOT EXISTS p_inspection_photos (
     photo_id      UUID        PRIMARY KEY,
     inspection_id UUID        NOT NULL,
