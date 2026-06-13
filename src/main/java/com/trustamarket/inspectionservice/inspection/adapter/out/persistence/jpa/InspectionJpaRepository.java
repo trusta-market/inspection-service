@@ -21,6 +21,7 @@ public interface InspectionJpaRepository extends JpaRepository<InspectionJpaEnti
                 i.originalPriceAmount, i.originalPriceCurrency, i.status, i.requestedAt)
             FROM InspectionJpaEntity i
             WHERE i.sellerId = :sellerId AND i.deletedAt IS NULL
+            ORDER BY i.requestedAt DESC, i.inspectionId DESC
             """)
     List<InspectionSummaryProjection> findSummariesBySellerId(@Param("sellerId") UUID sellerId, Pageable pageable);
 
