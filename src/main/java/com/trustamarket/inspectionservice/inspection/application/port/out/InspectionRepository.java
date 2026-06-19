@@ -13,9 +13,15 @@ public interface InspectionRepository {
 
     Inspection save(Inspection inspection);
 
+    Inspection updateStatus(Inspection inspection);
+
     Optional<Inspection> findById(InspectionId id);
 
     Optional<Inspection> findByProductId(ProductId productId);
+
+    Optional<Inspection> findByIdWithoutPhotos(InspectionId id);
+
+    Optional<Inspection> findByProductIdWithoutPhotos(ProductId productId);
 
     List<GetInspectionSummaryResult> findSummariesBySellerId(SellerId sellerId, int page, int size);
 

@@ -156,18 +156,6 @@ public class InspectionJpaEntity implements Persistable<UUID> {
         this.resultDetail = resultDetail;
     }
 
-    // 추가된 사진만 INSERT, 제거된 사진만 DELETE — 변경 없는 사진은 그대로 유지
-    public void syncPhotos(List<InspectionPhotoJpaEntity> domainPhotos) {
-        photos.removeIf(existing ->
-                domainPhotos.stream().noneMatch(dp -> dp.getPhotoId().equals(existing.getPhotoId()))
-        );
-        domainPhotos.forEach(dp -> {
-            if (photos.stream().noneMatch(existing -> existing.getPhotoId().equals(dp.getPhotoId()))) {
-                photos.add(dp);
-            }
-        });
-    }
-
     public static InspectionJpaEntity of(
             UUID inspectionId,
             UUID productId,

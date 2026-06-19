@@ -4,14 +4,12 @@ import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
 import com.trustamarket.inspectionservice.inspection.domain.enums.Grade;
 import com.trustamarket.inspectionservice.inspection.domain.enums.InspectionStatus;
 
-import com.trustamarket.inspectionservice.inspection.domain.enums.PhotoType;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionErrorCode;
 import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionResultDetail;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectorId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.Money;
-import com.trustamarket.inspectionservice.inspection.domain.vo.PhotoId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.SellerId;
 import lombok.Getter;
@@ -19,10 +17,8 @@ import lombok.Getter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 public class Inspection {
@@ -183,41 +179,8 @@ public class Inspection {
         this.status = InspectionStatus.RETURN_COMPLETED;
     }
 
-    public PhotoId addPhoto(PhotoType photoType, String url, String caption, int displayOrder) {
-        ensurePhotoTypeAllowed(photoType);
-        PhotoId photoId = PhotoId.generate();
-        photos.add(new InspectionPhoto(photoId, photoType, url, caption, displayOrder));
-        return photoId;
-    }
-
-    public void removePhoto(PhotoId photoId) {
-        InspectionPhoto target = photos.stream()
-                .filter(p -> p.id().equals(photoId))
-                .findFirst()
-                .orElseThrow(() -> new InspectionException(InspectionErrorCode.PHOTO_NOT_FOUND, photoId.toString()));
-        ensurePhotoTypeAllowed(target.type());
-        photos.remove(target);
-    }
-
     public List<InspectionPhoto> getPhotos() {
         return Collections.unmodifiableList(photos);
-    }
-
-    private void ensurePhotoTypeAllowed(PhotoType photoType) {
-        Set<PhotoType> allowed = allowedPhotoTypes();
-        if (!allowed.contains(photoType)) {
-            throw new InspectionException(
-                    InspectionErrorCode.PHOTO_TYPE_NOT_ALLOWED, "현재: " + status + ", photoType: " + photoType
-            );
-        }
-    }
-
-    private Set<PhotoType> allowedPhotoTypes() {
-        return switch (status) {
-            case REQUESTED, ARRIVED -> EnumSet.of(PhotoType.EXTERIOR, PhotoType.INTERIOR);
-            case IN_PROGRESS -> EnumSet.of(PhotoType.DEFECT, PhotoType.TAG);
-            default -> EnumSet.noneOf(PhotoType.class);
-        };
     }
 
     private void requireStatus(InspectionStatus expected, String action) {
