@@ -2,6 +2,8 @@ package com.trustamarket.inspectionservice.inspection.adapter.out.persistence.jp
 
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import com.trustamarket.inspectionservice.inspection.application.port.out.InspectionRepository;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionErrorCode;
+import com.trustamarket.inspectionservice.inspection.domain.exception.InspectionException;
 import com.trustamarket.inspectionservice.inspection.domain.model.Inspection;
 import com.trustamarket.inspectionservice.inspection.domain.vo.InspectionId;
 import com.trustamarket.inspectionservice.inspection.domain.vo.ProductId;
@@ -22,12 +24,15 @@ public class InspectionRepositoryImpl implements InspectionRepository {
 
     @Override
     public Inspection save(Inspection inspection) {
-        Optional<InspectionJpaEntity> existing = jpaRepository.findById(inspection.getId().value());
-        if (existing.isPresent()) {
-            mapper.updateJpaEntity(existing.get(), inspection);
-            return mapper.toDomain(existing.get());
-        }
-        return mapper.toDomain(jpaRepository.save(mapper.toJpaEntity(inspection)));
+        return mapper.toDomainWithoutPhotos(jpaRepository.save(mapper.toJpaEntity(inspection)));
+    }
+
+    @Override
+    public Inspection updateStatus(Inspection inspection) {
+        InspectionJpaEntity entity = jpaRepository.findById(inspection.getId().value())
+                .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND));
+        mapper.updateStatusFields(entity, inspection);
+        return mapper.toDomainWithoutPhotos(entity);
     }
 
     @Override
@@ -38,6 +43,16 @@ public class InspectionRepositoryImpl implements InspectionRepository {
     @Override
     public Optional<Inspection> findByProductId(ProductId productId) {
         return jpaRepository.findByProductIdAndDeletedAtIsNull(productId.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Inspection> findByIdWithoutPhotos(InspectionId id) {
+        return jpaRepository.findByInspectionIdAndDeletedAtIsNull(id.value()).map(mapper::toDomainWithoutPhotos);
+    }
+
+    @Override
+    public Optional<Inspection> findByProductIdWithoutPhotos(ProductId productId) {
+        return jpaRepository.findByProductIdAndDeletedAtIsNull(productId.value()).map(mapper::toDomainWithoutPhotos);
     }
 
     @Override

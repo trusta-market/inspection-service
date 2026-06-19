@@ -12,6 +12,8 @@ import com.trustamarket.inspectionservice.inspection.domain.vo.SellerId;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class InspectionMapper {
 
@@ -40,7 +42,7 @@ public class InspectionMapper {
         );
     }
 
-    public InspectionJpaEntity updateJpaEntity(InspectionJpaEntity existing, Inspection inspection) {
+    public InspectionJpaEntity updateStatusFields(InspectionJpaEntity existing, Inspection inspection) {
         existing.update(
                 inspection.getStatus(),
                 inspection.getInspectorId() != null ? inspection.getInspectorId().value() : null,
@@ -54,11 +56,6 @@ public class InspectionMapper {
                 inspection.getSuggestedPrice() != null ? inspection.getSuggestedPrice().currency() : null,
                 inspection.getInspectorNote(),
                 inspection.getResultDetail()
-        );
-        existing.syncPhotos(
-                inspection.getPhotos().stream()
-                        .map(p -> InspectionPhotoJpaEntity.of(p.id().value(), p.type(), p.url(), p.caption(), p.displayOrder()))
-                        .toList()
         );
         return existing;
     }
@@ -86,6 +83,30 @@ public class InspectionMapper {
                 entity.getPhotos().stream()
                         .map(p -> InspectionPhoto.of(PhotoId.of(p.getPhotoId()), p.getType(), p.getUrl(), p.getCaption(), p.getDisplayOrder()))
                         .toList()
+        );
+    }
+
+    public Inspection toDomainWithoutPhotos(InspectionJpaEntity entity) {
+        return Inspection.restore(
+                InspectionId.of(entity.getInspectionId()),
+                ProductId.of(entity.getProductId()),
+                SellerId.of(entity.getSellerId()),
+                CenterId.of(entity.getCenterId()),
+                Money.of(entity.getOriginalPriceAmount(), entity.getOriginalPriceCurrency()),
+                entity.getRequestedAt(),
+                entity.getStatus(),
+                entity.getInspectorId() != null ? InspectorId.of(entity.getInspectorId()) : null,
+                entity.getArrivedAt(),
+                entity.getStartedAt(),
+                entity.getInspectionDoneAt(),
+                entity.getPricedAt(),
+                entity.getReturnCompletedAt(),
+                entity.getGrade(),
+                entity.getSuggestedPriceAmount() != null
+                        ? Money.of(entity.getSuggestedPriceAmount(), entity.getSuggestedPriceCurrency()) : null,
+                entity.getInspectorNote(),
+                entity.getResultDetail(),
+                List.of()
         );
     }
 }

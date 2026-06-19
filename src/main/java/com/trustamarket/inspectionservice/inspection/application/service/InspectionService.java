@@ -80,16 +80,16 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Override
     @Transactional
     public void markArrived(MarkArrivedCommand command) {
-        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+        Inspection inspection = inspectionRepository.findByProductIdWithoutPhotos(ProductId.of(command.productId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
         inspection.markArrived(Instant.now());
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
     }
 
     @Override
     @Transactional
     public void complete(CompleteInspectionCommand command) {
-        Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
+        Inspection inspection = inspectionRepository.findByIdWithoutPhotos(InspectionId.of(command.inspectionId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
         inspection.completeInspection(
                 Grade.valueOf(command.grade()),
@@ -98,7 +98,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
                 command.resultDetail() != null ? new InspectionResultDetail(command.resultDetail()) : InspectionResultDetail.empty(),
                 Instant.now()
         );
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
         inspectionEventPublisher.publish(new InspectionCompletedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value(),
@@ -112,14 +112,14 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Override
     @Transactional
     public void fail(FailInspectionCommand command) {
-        Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
+        Inspection inspection = inspectionRepository.findByIdWithoutPhotos(InspectionId.of(command.inspectionId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
         inspection.failInspection(
                 command.inspectorNote(),
                 command.resultDetail() != null ? new InspectionResultDetail(command.resultDetail()) : InspectionResultDetail.empty(),
                 Instant.now()
         );
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
         inspectionEventPublisher.publish(new InspectionFailedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value(),
@@ -131,19 +131,19 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Override
     @Transactional
     public void accept(AcceptPriceCommand command) {
-        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+        Inspection inspection = inspectionRepository.findByProductIdWithoutPhotos(ProductId.of(command.productId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
         inspection.acceptPrice(Instant.now());
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
     }
 
     @Override
     @Transactional
     public void reject(RejectPriceCommand command) {
-        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+        Inspection inspection = inspectionRepository.findByProductIdWithoutPhotos(ProductId.of(command.productId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
         inspection.rejectPrice(Instant.now());
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
         inspectionEventPublisher.publish(new InspectionFailedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value(),
@@ -155,10 +155,10 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Override
     @Transactional
     public void start(StartInspectionCommand command) {
-        Inspection inspection = inspectionRepository.findById(InspectionId.of(command.inspectionId()))
+        Inspection inspection = inspectionRepository.findByIdWithoutPhotos(InspectionId.of(command.inspectionId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
         inspection.start(InspectorId.of(command.inspectorId()), Instant.now());
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
         inspectionEventPublisher.publish(new InspectionStartedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value()
@@ -168,10 +168,10 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     @Override
     @Transactional
     public void completeReturn(CompleteReturnCommand command) {
-        Inspection inspection = inspectionRepository.findByProductId(ProductId.of(command.productId()))
+        Inspection inspection = inspectionRepository.findByProductIdWithoutPhotos(ProductId.of(command.productId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "productId=" + command.productId()));
         inspection.completeReturn(Instant.now());
-        inspectionRepository.save(inspection);
+        inspectionRepository.updateStatus(inspection);
         inspectionEventPublisher.publish(new InspectionReturnCompletedEvent(
                 inspection.getId().value(),
                 inspection.getProductId().value(),
