@@ -8,4 +8,5 @@ public record GetCenterPageResult(
         int size,
         long totalElements,
         int totalPages
-) {}
+) {
+}

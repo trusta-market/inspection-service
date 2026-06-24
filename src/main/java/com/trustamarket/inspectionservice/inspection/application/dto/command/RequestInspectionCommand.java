@@ -8,4 +8,5 @@ public record RequestInspectionCommand(
         UUID centerId,
         long originalPriceAmount,
         String currency
-) {}
+) {
+}

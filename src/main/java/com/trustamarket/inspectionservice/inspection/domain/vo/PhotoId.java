@@ -12,10 +12,6 @@ public record PhotoId(UUID value) {
         }
     }
 
-    public static PhotoId generate() {
-        return new PhotoId(UUID.randomUUID());
-    }
-
     public static PhotoId of(UUID value) {
         return new PhotoId(value);
     }

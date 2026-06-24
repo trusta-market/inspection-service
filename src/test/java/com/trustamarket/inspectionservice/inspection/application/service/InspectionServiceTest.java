@@ -95,7 +95,7 @@ class InspectionServiceTest {
 
     private Inspection failedInspection() {
         Inspection inspection = inProgressInspection();
-        inspection.failInspection("심각한 손상 발견", null, Instant.now());
+        inspection.fail("심각한 손상 발견", null, Instant.now());
         return inspection;
     }
 

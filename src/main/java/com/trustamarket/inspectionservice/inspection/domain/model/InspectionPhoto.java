@@ -17,9 +17,11 @@ public record InspectionPhoto(
     public InspectionPhoto {
         Objects.requireNonNull(id, "PhotoId는 필수입니다");
         Objects.requireNonNull(type, "PhotoType은 필수입니다");
+
         if (url == null || url.isBlank()) {
             throw new InspectionException(InspectionErrorCode.INVALID_PHOTO_URL);
         }
+
         if (displayOrder < 0) {
             throw new InspectionException(InspectionErrorCode.INVALID_DISPLAY_ORDER);
         }
