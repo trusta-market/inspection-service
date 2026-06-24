@@ -1,23 +1,23 @@
 package com.trustamarket.inspectionservice.inspection.application.service;
 
 import com.trustamarket.inspectionservice.center.domain.vo.CenterId;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.AcceptPriceCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.CompleteReturnCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.FailInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.MarkArrivedCommand;
+import com.trustamarket.inspectionservice.inspection.application.dto.command.RejectPriceCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.RequestInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.command.StartInspectionCommand;
 import com.trustamarket.inspectionservice.inspection.application.dto.query.GetMyInspectionsQuery;
+import com.trustamarket.inspectionservice.inspection.application.dto.result.GetCenterIdByProductIdResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionPageResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionResult;
 import com.trustamarket.inspectionservice.inspection.application.dto.result.GetInspectionSummaryResult;
-import com.trustamarket.inspectionservice.inspection.application.dto.command.AcceptPriceCommand;
-import com.trustamarket.inspectionservice.inspection.application.dto.command.RejectPriceCommand;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionFailedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionReturnCompletedEvent;
 import com.trustamarket.inspectionservice.inspection.application.event.InspectionStartedEvent;
-import com.trustamarket.inspectionservice.inspection.application.dto.result.GetCenterIdByProductIdResult;
 import com.trustamarket.inspectionservice.inspection.application.port.in.AcceptPriceUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteInspectionUseCase;
 import com.trustamarket.inspectionservice.inspection.application.port.in.CompleteReturnUseCase;
@@ -91,7 +91,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     public void complete(CompleteInspectionCommand command) {
         Inspection inspection = inspectionRepository.findByIdWithoutPhotos(InspectionId.of(command.inspectionId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
-        inspection.completeInspection(
+        inspection.complete(
                 Grade.valueOf(command.grade()),
                 Money.of(command.suggestedPriceAmount(), CurrencyCode.valueOf(command.currency())),
                 command.inspectorNote(),
@@ -114,7 +114,7 @@ public class InspectionService implements RequestInspectionUseCase, MarkArrivedU
     public void fail(FailInspectionCommand command) {
         Inspection inspection = inspectionRepository.findByIdWithoutPhotos(InspectionId.of(command.inspectionId()))
                 .orElseThrow(() -> new InspectionException(InspectionErrorCode.INSPECTION_NOT_FOUND, "inspectionId=" + command.inspectionId()));
-        inspection.failInspection(
+        inspection.fail(
                 command.inspectorNote(),
                 command.resultDetail() != null ? new InspectionResultDetail(command.resultDetail()) : InspectionResultDetail.empty(),
                 Instant.now()

@@ -8,4 +8,5 @@ public record RegisterCenterResult(
         UUID centerId,
         String name,
         CenterStatus status
-) {}
+) {
+}

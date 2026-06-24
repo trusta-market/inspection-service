@@ -127,7 +127,7 @@ public class Inspection {
         this.startedAt = Objects.requireNonNull(startedAt);
     }
 
-    public void completeInspection(
+    public void complete(
             Grade grade,
             Money suggestedPrice,
             String inspectorNote,
@@ -144,7 +144,7 @@ public class Inspection {
         this.status = InspectionStatus.PRICED;
     }
 
-    public void failInspection(
+    public void fail(
             String inspectorNote,
             InspectionResultDetail resultDetail,
             Instant at
